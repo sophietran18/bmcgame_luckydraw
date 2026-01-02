@@ -704,7 +704,11 @@
     // MoMo Illustration pack (uploaded locally)
    // ===== MoMo Illustration pack: hard-code list (Cách 1) =====
 // Lưu ý: encodeURIComponent để xử lý khoảng trắng, dấu +, dấu tiếng Việt...
-const MOMO_ASSET_NAMES = [
+let momoPackImages = MOMO_ASSET_NAMES.map(
+  name => `/assets/${encodeURIComponent(name)}`
+);
+
+    const MOMO_ASSET_NAMES = [
   // (đã có trước) + (bổ sung từ screenshot mới)
   "Mkt solution_Chu cua hang_01.png",
   "Mkt solution_Chu cua hang_02.png",
@@ -1511,5 +1515,6 @@ let momoPackImages = MOMO_ASSET_NAMES.map(name => `/assets/momo/${encodeURICompo
   </script>
 </body>
 </html>
+
 
 

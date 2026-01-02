@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Neon Dash — BMC Team Race</title>
+  <title>BMC Lucky Game — BMC Team Race</title>
   <style>
     :root{
       --bg0:#070A12;
@@ -525,9 +525,9 @@
   <div class="wrap">
     <header>
       <div class="brand">
-        <h1 class="title">Neon Dash <span class="badge">BMC Team Avatars 👤</span></h1>
+        <h1 class="title"BMC Lucky Game <span class="badge">Racing Game 👤</span></h1>
         <p class="subtitle">
-          Theme 1: Mood Emojis · Theme 2: F&B Emojis · Theme 3: MoMo Illustration (load từ folder <b>/assets</b> trong repo)
+          a product of BMC-Marketing Transformation team
         </p>
       </div>
       <div class="pill">Tip: <b>Space</b> Start/Pause · <b>B</b> Boost ngẫu nhiên</div>
@@ -772,6 +772,15 @@ const momoPackImages = MOMO_ASSET_NAMES.map(
       const t = THEMES[name] || THEMES.mood;
       document.documentElement.style.setProperty("--bg0", t.bg0);
       document.documentElement.style.setProperty("--bg1", t.bg1);
+      // text color per theme
+if (name === "fb") {
+  document.documentElement.style.setProperty("--txt", "rgba(20,20,30,.92)");
+  document.documentElement.style.setProperty("--muted", "rgba(20,20,30,.62)");
+} else {
+  document.documentElement.style.setProperty("--txt", "rgba(255,255,255,.92)");
+  document.documentElement.style.setProperty("--muted", "rgba(255,255,255,.65)");
+}
+
 
       if (name === "fb"){
         document.body.style.background =
@@ -1453,4 +1462,5 @@ const momoPackImages = MOMO_ASSET_NAMES.map(
   </script>
 </body>
 </html>
+
 

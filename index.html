@@ -127,7 +127,7 @@
       display:block;
     }
 
-    .wrap{ max-width:1100px; margin:0 auto; padding:28px 18px 34px; position:relative; z-index: 2; }
+    .wrap{ max-width:980px; margin:0 auto; padding:28px 18px 34px; position:relative; z-index: 2; }
 
     header{
       display:flex; align-items:flex-start; justify-content:space-between;
@@ -158,10 +158,13 @@
       -webkit-backdrop-filter: blur(12px);
     }
 
-    .top{
-      display:grid; grid-template-columns: 1.05fr .95fr;
-      gap:14px; margin-bottom:14px;
-    }
+   .top{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:14px;
+  margin-bottom:14px;
+}
+
     @media (max-width: 920px){ .top{ grid-template-columns: 1fr; } }
 
     .controls{ padding:16px; position:relative; overflow:hidden; }
@@ -1459,6 +1462,7 @@ if (name === "fb") {
   </script>
 </body>
 </html>
+
 
 
 

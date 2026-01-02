@@ -3,25 +3,21 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Lucky Draw Racing Game | BMC Demo</title>
+  <title>Neon Dash — BMC Team Race</title>
   <style>
     :root{
       --bg0:#070A12;
       --bg1:#0B1430;
-      --card:rgba(255,255,255,.08);
-      --card2:rgba(255,255,255,.12);
       --stroke:rgba(255,255,255,.14);
       --txt:rgba(255,255,255,.92);
       --muted:rgba(255,255,255,.65);
       --accent:#7C4DFF;
       --accent2:#00E5FF;
       --good:#3DFF8B;
-      --warn:#FFCC00;
       --bad:#FF4D6D;
       --shadow: 0 18px 60px rgba(0,0,0,.55);
       --radius: 22px;
     }
-
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
     body{
@@ -35,58 +31,123 @@
         linear-gradient(180deg, var(--bg0), var(--bg1));
       overflow-x:hidden;
     }
-
     .noise{
       pointer-events:none;
       position:fixed; inset:0;
       opacity:.08;
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.65'/%3E%3C/svg%3E");
       mix-blend-mode: overlay;
+      z-index: 4;
     }
 
-    .wrap{
-      max-width:1100px;
-      margin:0 auto;
-      padding:28px 18px 34px;
+    /* ===== Floating Theme Layer ===== */
+    .floating-layer{
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0; /* behind UI */
+      overflow: hidden;
     }
+    .float-emoji{
+      position: absolute;
+      display: grid;
+      place-items: center;
+      transform: translate3d(0,0,0);
+      will-change: transform;
+      filter:
+        drop-shadow(0 18px 40px rgba(0,0,0,.45))
+        drop-shadow(0 0 28px rgba(0,229,255,.10));
+      opacity: .92;
+      animation: floaty var(--t, 6s) ease-in-out infinite;
+    }
+    .float-emoji .g{
+      font-size: var(--s, 54px);
+      line-height: 1;
+      transform: rotate(var(--r, 0deg));
+      text-shadow:
+        0 10px 22px rgba(0,0,0,.35),
+        0 0 22px rgba(124,77,255,.12),
+        0 0 16px rgba(0,229,255,.10);
+      animation: spinny var(--t2, 7s) ease-in-out infinite;
+    }
+    .float-emoji::after{
+      content:"";
+      position:absolute;
+      width: 60%;
+      height: 60%;
+      border-radius: 999px;
+      top: 10%;
+      left: 15%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.28), transparent 60%);
+      filter: blur(2px);
+      opacity:.75;
+      transform: rotate(12deg);
+    }
+    @keyframes floaty{
+      0%   { transform: translate3d(var(--x,0px), calc(var(--y,0px) + 14px), 0) rotate(0.001deg); }
+      50%  { transform: translate3d(calc(var(--x,0px) + 10px), calc(var(--y,0px) - 18px), 0) rotate(0.001deg); }
+      100% { transform: translate3d(var(--x,0px), calc(var(--y,0px) + 14px), 0) rotate(0.001deg); }
+    }
+    @keyframes spinny{
+      0% { transform: rotate(calc(var(--r,0deg) - 8deg)); }
+      50% { transform: rotate(calc(var(--r,0deg) + 10deg)); }
+      100% { transform: rotate(calc(var(--r,0deg) - 8deg)); }
+    }
+    .float-star{
+      position:absolute;
+      width: 6px; height: 6px;
+      border-radius: 2px;
+      background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(0,229,255,.55));
+      box-shadow:
+        0 0 14px rgba(124,77,255,.18),
+        0 0 10px rgba(0,229,255,.14);
+      opacity: .8;
+      animation: twinkle 2.8s ease-in-out infinite;
+    }
+    @keyframes twinkle{
+      0%,100% { transform: scale(.85) rotate(12deg); opacity:.55; }
+      50% { transform: scale(1.15) rotate(-10deg); opacity:.95; }
+    }
+
+    /* floating image (MoMo Illustration pack) */
+    .float-img{
+      position:absolute;
+      width: var(--w, 92px);
+      height: var(--h, 92px);
+      opacity: var(--op, .92);
+      transform: translate3d(0,0,0);
+      will-change: transform;
+      filter: drop-shadow(0 18px 40px rgba(0,0,0,.35));
+      animation: floaty var(--t, 6.2s) ease-in-out infinite;
+    }
+    .float-img img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+    }
+
+    .wrap{ max-width:1100px; margin:0 auto; padding:28px 18px 34px; position:relative; z-index: 2; }
 
     header{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:16px;
-      margin-bottom:18px;
+      display:flex; align-items:flex-start; justify-content:space-between;
+      gap:16px; margin-bottom:18px;
     }
-
-    .brand{
-      display:flex; flex-direction:column; gap:6px;
-    }
-
+    .brand{ display:flex; flex-direction:column; gap:6px; }
     .title{
       font-size: clamp(26px, 4vw, 38px);
-      letter-spacing:-.02em;
-      line-height:1.05;
-      margin:0;
-      display:flex;
-      align-items:center;
-      gap:10px;
+      letter-spacing:-.02em; line-height:1.05; margin:0;
+      display:flex; align-items:center; gap:10px;
     }
     .title .badge{
-      font-size:.75rem;
-      padding:6px 10px;
+      font-size:.75rem; padding:6px 10px;
       border:1px solid var(--stroke);
       background:linear-gradient(90deg, rgba(124,77,255,.22), rgba(0,229,255,.18));
       border-radius:999px;
       box-shadow: 0 10px 40px rgba(0,0,0,.35);
       color:var(--txt);
     }
-
-    .subtitle{
-      margin:0;
-      color:var(--muted);
-      font-size: 0.98rem;
-      max-width: 62ch;
-    }
+    .subtitle{ margin:0; color:var(--muted); font-size:.98rem; max-width:62ch; }
 
     .panel{
       background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
@@ -98,58 +159,28 @@
     }
 
     .top{
-      display:grid;
-      grid-template-columns: 1.05fr .95fr;
-      gap:14px;
-      margin-bottom:14px;
+      display:grid; grid-template-columns: 1.05fr .95fr;
+      gap:14px; margin-bottom:14px;
     }
+    @media (max-width: 920px){ .top{ grid-template-columns: 1fr; } }
 
-    @media (max-width: 920px){
-      .top{ grid-template-columns: 1fr; }
-    }
-
-    .controls{
-      padding:16px;
-      position:relative;
-      overflow:hidden;
-    }
+    .controls{ padding:16px; position:relative; overflow:hidden; }
     .controls:before{
-      content:"";
-      position:absolute; inset:-2px;
-      background: radial-gradient(800px 220px at 20% 0%, rgba(124,77,255,.22), transparent 60%),
-                  radial-gradient(700px 240px at 85% 15%, rgba(0,229,255,.18), transparent 55%);
-      filter: blur(14px);
-      opacity:.85;
-      pointer-events:none;
+      content:""; position:absolute; inset:-2px;
+      background:
+        radial-gradient(800px 220px at 20% 0%, rgba(124,77,255,.22), transparent 60%),
+        radial-gradient(700px 240px at 85% 15%, rgba(0,229,255,.18), transparent 55%);
+      filter: blur(14px); opacity:.85; pointer-events:none;
     }
-
     .controls > *{ position:relative; }
 
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-      align-items:start;
-    }
-    @media (max-width:560px){
-      .grid{ grid-template-columns: 1fr; }
-    }
-
-    .row{
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-
-    label{
-      font-size:.85rem;
-      color:var(--muted);
-    }
+    .grid{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; align-items:start; }
+    @media (max-width:560px){ .grid{ grid-template-columns: 1fr; } }
+    .row{ display:flex; flex-direction:column; gap:6px; }
+    label{ font-size:.85rem; color:var(--muted); }
 
     .input{
-      display:flex;
-      align-items:center;
-      gap:10px;
+      display:flex; align-items:center; gap:10px;
       padding:12px 12px;
       background: rgba(0,0,0,.24);
       border:1px solid rgba(255,255,255,.14);
@@ -161,38 +192,23 @@
       box-shadow: 0 0 0 4px rgba(124,77,255,.14);
     }
     .input input, .input select{
-      width:100%;
-      border:0;
-      outline:none;
-      background:transparent;
-      color:var(--txt);
-      font-size: 0.98rem;
-    }
-    .input input::placeholder{ color: rgba(255,255,255,.45); }
-
-    .btns{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-top: 12px;
+      width:100%; border:0; outline:none;
+      background:transparent; color:var(--txt);
+      font-size:.98rem;
     }
 
+    .btns{ display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
     button{
-      border:0;
-      cursor:pointer;
-      color:var(--txt);
-      border-radius: 14px;
-      padding: 11px 13px;
-      font-weight: 650;
-      letter-spacing:.01em;
+      border:0; cursor:pointer; color:var(--txt);
+      border-radius:14px; padding:11px 13px;
+      font-weight:650; letter-spacing:.01em;
       background: rgba(255,255,255,.09);
-      border: 1px solid rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.16);
       transition: transform .08s ease, background .18s ease, border-color .18s ease;
       user-select:none;
     }
     button:hover{ background: rgba(255,255,255,.12); }
     button:active{ transform: translateY(1px) scale(.99); }
-
     .primary{
       background: linear-gradient(90deg, rgba(124,77,255,.92), rgba(0,229,255,.82));
       border-color: rgba(255,255,255,.18);
@@ -202,170 +218,132 @@
       filter: brightness(1.02);
       background: linear-gradient(90deg, rgba(124,77,255,.98), rgba(0,229,255,.90));
     }
-
-    .ghost{
-      background: rgba(0,0,0,.20);
-      border-color: rgba(255,255,255,.14);
-    }
-
-    .danger{
-      background: rgba(255,77,109,.14);
-      border-color: rgba(255,77,109,.32);
-    }
-
-    .tiny{
-      padding:8px 10px;
-      border-radius: 12px;
-      font-size:.92rem;
-      font-weight: 650;
-    }
+    .ghost{ background: rgba(0,0,0,.20); border-color: rgba(255,255,255,.14); }
+    .danger{ background: rgba(255,77,109,.14); border-color: rgba(255,77,109,.32); }
+    .tiny{ padding:8px 10px; border-radius:12px; font-size:.92rem; font-weight:650; }
 
     .tip{
-      margin-top:10px;
-      font-size:.9rem;
-      color:var(--muted);
-      display:flex;
-      gap:10px;
-      align-items:flex-start;
-      line-height:1.35;
+      margin-top:10px; font-size:.9rem; color:var(--muted);
+      display:flex; gap:10px; align-items:flex-start; line-height:1.35;
     }
     .tip .dot{
       width:10px; height:10px; margin-top:4px;
-      border-radius: 999px;
+      border-radius:999px;
       background: linear-gradient(180deg, var(--accent), var(--accent2));
       box-shadow: 0 0 0 5px rgba(124,77,255,.12);
-      flex: 0 0 auto;
+      flex:0 0 auto;
     }
 
-    .roster{
-      padding:16px;
-    }
-
+    .roster{ padding:16px; }
     .rosterTop{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-      margin-bottom: 10px;
+      display:flex; justify-content:space-between; align-items:center;
+      gap:10px; margin-bottom:10px;
     }
-
     .rosterTitle{
-      margin:0;
-      font-size: 1.05rem;
-      letter-spacing:-.01em;
-      display:flex;
-      gap:10px;
-      align-items:center;
+      margin:0; font-size:1.05rem; letter-spacing:-.01em;
+      display:flex; gap:10px; align-items:center;
     }
-
     .pill{
-      font-size:.78rem;
-      padding:6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.16);
+      font-size:.78rem; padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.16);
       background: rgba(0,0,0,.18);
       color: var(--muted);
     }
-
-    .list{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
+    .list{ display:flex; flex-direction:column; gap:10px; }
 
     .racerInput{
       display:grid;
       grid-template-columns: 62px 1fr 60px;
-      gap:10px;
-      align-items:center;
+      gap:10px; align-items:center;
       padding:10px;
       background: rgba(0,0,0,.18);
       border:1px solid rgba(255,255,255,.12);
-      border-radius: 16px;
+      border-radius:16px;
     }
-    .racerInput .emoji{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size: 1.6rem;
+
+    /* avatar box */
+    .avatarBox{
       width:62px; height:44px;
-      border-radius: 14px;
+      border-radius:14px;
       background: rgba(255,255,255,.07);
       border:1px solid rgba(255,255,255,.12);
+      display:flex; align-items:center; justify-content:center;
+      overflow:hidden;
+      cursor:pointer;
+      position:relative;
     }
-    .racerInput input{
+    .avatarBox:hover{
+      border-color: rgba(0,229,255,.35);
+      box-shadow: 0 0 0 4px rgba(0,229,255,.08);
+    }
+    .avatarBox img{
       width:100%;
-      border:0; outline:none;
-      background: transparent;
-      color: var(--txt);
-      font-size: 1rem;
+      height:100%;
+      object-fit:cover;
+      border-radius: 14px;
+      display:block;
+    }
+    .avatarBox .emojiFallback{
+      font-size:1.6rem;
+      line-height:1;
+    }
+    .avatarHint{
+      position:absolute;
+      right:4px; bottom:4px;
+      font-size:10px;
+      padding:2px 6px;
+      border-radius:999px;
+      background: rgba(0,0,0,.35);
+      border:1px solid rgba(255,255,255,.14);
+      color: rgba(255,255,255,.78);
+      backdrop-filter: blur(10px);
+      pointer-events:none;
+    }
+
+    .racerInput input{
+      width:100%; border:0; outline:none;
+      background:transparent; color:var(--txt);
+      font-size:1rem;
     }
     .racerInput input::placeholder{ color: rgba(255,255,255,.45); }
-    .racerInput .x{
-      width:60px;
-      display:flex;
-      justify-content:flex-end;
-    }
+    .racerInput .x{ width:60px; display:flex; justify-content:flex-end; }
 
-    .track{
-      padding:16px;
-      overflow:hidden;
-      position:relative;
-    }
-
+    .track{ padding:16px; overflow:hidden; position:relative; }
     .trackTop{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-end;
-      gap:12px;
-      margin-bottom: 10px;
+      display:flex; justify-content:space-between; align-items:flex-end;
+      gap:12px; margin-bottom:10px;
     }
     .meta{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-      color: var(--muted);
-      font-size:.92rem;
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+      color:var(--muted); font-size:.92rem;
     }
-    .meta b{ color: var(--txt); }
+    .meta b{ color:var(--txt); }
 
-    .progressWrap{
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-
+    .progressWrap{ display:flex; gap:10px; align-items:center; }
     .bar{
-      width: 220px;
-      max-width: 40vw;
-      height: 12px;
-      border-radius: 999px;
+      width:220px; max-width:40vw;
+      height:12px; border-radius:999px;
       background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.14);
+      border:1px solid rgba(255,255,255,.14);
       overflow:hidden;
-      position:relative;
     }
     .bar > i{
-      display:block;
-      height:100%;
-      width:0%;
+      display:block; height:100%; width:0%;
       background: linear-gradient(90deg, rgba(124,77,255,.95), rgba(0,229,255,.85), rgba(61,255,139,.75));
-      border-radius: 999px;
+      border-radius:999px;
       box-shadow: 0 0 24px rgba(0,229,255,.18);
       transition: width .08s linear;
     }
     .pct{
-      min-width: 44px;
-      text-align:right;
+      min-width:44px; text-align:right;
       font-variant-numeric: tabular-nums;
-      color: var(--txt);
-      opacity:.9;
+      color:var(--txt); opacity:.9;
     }
 
     .lanes{
       position:relative;
-      border-radius: 18px;
+      border-radius:18px;
       border:1px solid rgba(255,255,255,.12);
       background:
         linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.06)),
@@ -374,46 +352,31 @@
     }
 
     .finish{
-      position:absolute;
-      top:0; bottom:0;
-      right: 62px;
-      width: 16px;
-      background:
-        repeating-linear-gradient(
-          180deg,
-          rgba(255,255,255,.9) 0 10px,
-          rgba(0,0,0,.65) 10px 20px
-        );
+      position:absolute; top:0; bottom:0;
+      right:62px; width:16px;
+      background: repeating-linear-gradient(180deg, rgba(255,255,255,.9) 0 10px, rgba(0,0,0,.65) 10px 20px);
       opacity:.85;
       box-shadow: 0 0 0 1px rgba(255,255,255,.18), 0 0 30px rgba(255,255,255,.08);
     }
     .finishLabel{
-      position:absolute;
-      right: 18px;
-      top: 10px;
-      font-size:.78rem;
-      color: var(--muted);
+      position:absolute; right:18px; top:10px;
+      font-size:.78rem; color:var(--muted);
       background: rgba(0,0,0,.22);
-      border: 1px solid rgba(255,255,255,.12);
-      padding: 6px 10px;
-      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.12);
+      padding:6px 10px; border-radius:999px;
       backdrop-filter: blur(10px);
     }
 
     .lane{
-      height: 62px;
-      position:relative;
-      display:flex;
-      align-items:center;
-      padding: 6px 12px;
+      height:62px; position:relative;
+      display:flex; align-items:center;
+      padding:6px 12px;
       border-top:1px solid rgba(255,255,255,.08);
       background: linear-gradient(90deg, rgba(255,255,255,.03), transparent 45%);
     }
     .lane:first-child{ border-top:0; }
-
     .lane:after{
-      content:"";
-      position:absolute; left:0; right:0; bottom:10px;
+      content:""; position:absolute; left:0; right:0; bottom:10px;
       height:2px;
       background: repeating-linear-gradient(90deg, rgba(255,255,255,.10) 0 12px, transparent 12px 26px);
       opacity:.55;
@@ -421,78 +384,61 @@
     }
 
     .kart{
-      position:absolute;
-      left: 12px;
-      display:flex;
-      align-items:center;
-      gap:10px;
+      position:absolute; left:12px;
+      display:flex; align-items:center; gap:10px;
       transform: translateX(0);
       transition: filter .12s ease;
     }
-
     .kart .bubble{
-      width:46px; height:46px;
-      display:grid; place-items:center;
-      border-radius: 16px;
+      width:46px; height:46px; display:grid; place-items:center;
+      border-radius:16px;
       background: rgba(255,255,255,.10);
       border:1px solid rgba(255,255,255,.14);
       box-shadow: 0 10px 30px rgba(0,0,0,.26);
-      font-size: 1.5rem;
+      overflow:hidden;
+      font-size:1.5rem;
+    }
+    .kart .bubble img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      border-radius:16px;
+      display:block;
     }
     .kart .tag{
-      padding: 8px 10px;
-      border-radius: 16px;
+      padding:8px 10px;
+      border-radius:16px;
       background: rgba(0,0,0,.22);
       border:1px solid rgba(255,255,255,.14);
       backdrop-filter: blur(10px);
-      display:flex;
-      gap:10px;
-      align-items:baseline;
-      min-width: 160px;
-      max-width: 44vw;
+      display:flex; gap:10px; align-items:baseline;
+      min-width:160px; max-width:44vw;
     }
     .kart .name{
-      font-weight: 750;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
+      font-weight:750; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
     }
     .kart .stat{
-      font-size:.82rem;
-      color: var(--muted);
+      font-size:.82rem; color:var(--muted);
       font-variant-numeric: tabular-nums;
-      margin-left:auto;
-      white-space:nowrap;
+      margin-left:auto; white-space:nowrap;
     }
-
-    .kart.win{
-      filter: drop-shadow(0 0 18px rgba(61,255,139,.22));
-    }
-    .kart.boost{
-      filter: drop-shadow(0 0 22px rgba(0,229,255,.22));
-    }
+    .kart.win{ filter: drop-shadow(0 0 18px rgba(61,255,139,.22)); }
+    .kart.boost{ filter: drop-shadow(0 0 22px rgba(0,229,255,.22)); }
 
     .toast{
-      margin-top: 10px;
-      font-size:.95rem;
-      color: var(--muted);
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      padding: 10px 12px;
-      border-radius: 16px;
-      border: 1px dashed rgba(255,255,255,.18);
+      margin-top:10px; font-size:.95rem; color:var(--muted);
+      display:flex; justify-content:space-between; align-items:center; gap:12px;
+      padding:10px 12px;
+      border-radius:16px;
+      border:1px dashed rgba(255,255,255,.18);
       background: rgba(0,0,0,.16);
     }
-
     .kbd{
-      font-size:.78rem;
-      padding:4px 8px;
-      border-radius: 10px;
+      font-size:.78rem; padding:4px 8px;
+      border-radius:10px;
       border:1px solid rgba(255,255,255,.14);
       background: rgba(255,255,255,.08);
-      color: var(--txt);
+      color:var(--txt);
       font-variant-numeric: tabular-nums;
       white-space:nowrap;
     }
@@ -500,19 +446,16 @@
     /* Winner modal */
     .modal{
       position:fixed; inset:0;
-      display:none;
-      align-items:center;
-      justify-content:center;
+      display:none; align-items:center; justify-content:center;
       padding:18px;
       background: rgba(0,0,0,.55);
       backdrop-filter: blur(10px);
       z-index: 50;
     }
     .modal.show{ display:flex; }
-
     .modalCard{
       width:min(680px, 96vw);
-      border-radius: 26px;
+      border-radius:26px;
       border:1px solid rgba(255,255,255,.18);
       background:
         radial-gradient(900px 420px at 20% 10%, rgba(124,77,255,.28), transparent 60%),
@@ -523,110 +466,74 @@
       position:relative;
     }
     .modalCard:before{
-      content:"";
-      position:absolute; inset:-2px;
+      content:""; position:absolute; inset:-2px;
       background: radial-gradient(1000px 240px at 50% 0%, rgba(61,255,139,.18), transparent 60%);
-      filter: blur(18px);
-      opacity:.9;
-      pointer-events:none;
+      filter: blur(18px); opacity:.9; pointer-events:none;
     }
     .modalInner{ position:relative; padding:18px; }
-    .modalTop{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .winnerTitle{
-      margin:0;
-      font-size: clamp(20px, 4vw, 30px);
-      letter-spacing:-.02em;
-    }
-    .winnerSub{
-      margin:6px 0 0;
-      color:var(--muted);
-      line-height:1.35;
-    }
+    .modalTop{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+    .winnerTitle{ margin:0; font-size: clamp(20px, 4vw, 30px); letter-spacing:-.02em; }
+    .winnerSub{ margin:6px 0 0; color:var(--muted); line-height:1.35; }
     .winnerHero{
       margin-top:14px;
-      display:flex;
-      gap:14px;
-      align-items:center;
+      display:flex; gap:14px; align-items:center;
       padding:14px;
-      border-radius: 20px;
+      border-radius:20px;
       background: rgba(0,0,0,.18);
       border:1px solid rgba(255,255,255,.14);
     }
     .winnerEmoji{
       width:64px; height:64px;
       display:grid; place-items:center;
-      border-radius: 22px;
+      border-radius:22px;
       background: rgba(255,255,255,.09);
       border:1px solid rgba(255,255,255,.14);
-      font-size: 2rem;
+      font-size:2rem;
       box-shadow: 0 16px 46px rgba(0,0,0,.30);
+      overflow:hidden;
     }
-    .winnerName{
-      font-size: 1.2rem;
-      font-weight: 800;
-      letter-spacing:-.01em;
+    .winnerEmoji img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      border-radius:22px;
+      display:block;
     }
-    .winnerStats{
-      margin-top:2px;
-      color: var(--muted);
-      font-size:.95rem;
-      font-variant-numeric: tabular-nums;
-    }
-    .modalActions{
-      margin-top: 14px;
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
+    .winnerName{ font-size:1.2rem; font-weight:800; letter-spacing:-.01em; }
+    .winnerStats{ margin-top:2px; color:var(--muted); font-size:.95rem; font-variant-numeric: tabular-nums; }
+    .modalActions{ margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; }
 
     /* Confetti */
-    #confetti{
-      position:fixed; inset:0;
-      pointer-events:none;
-      overflow:hidden;
-      z-index: 55;
-    }
+    #confetti{ position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index: 55; }
     .confetti{
       position:absolute;
       width:10px; height:16px;
-      border-radius: 4px;
+      border-radius:4px;
       opacity:.9;
       transform: translateY(-20px) rotate(0deg);
       animation: fall linear forwards;
     }
-    @keyframes fall{
-      to{
-        transform: translateY(calc(100vh + 40px)) rotate(720deg);
-      }
-    }
+    @keyframes fall{ to{ transform: translateY(calc(100vh + 40px)) rotate(720deg); } }
 
-    /* Small helper text */
-    .muted{ color: var(--muted); }
+    .muted{ color:var(--muted); }
     .mono{ font-variant-numeric: tabular-nums; }
-
   </style>
 </head>
+
 <body>
   <div class="noise"></div>
-
   <div id="confetti"></div>
+  <div id="floatingLayer" class="floating-layer" aria-hidden="true"></div>
 
   <div class="wrap">
     <header>
       <div class="brand">
-        <h1 class="title">Neon Dash <span class="badge">Gen Z vibe ✨</span></h1>
+        <h1 class="title">Neon Dash <span class="badge">BMC Team Avatars 👤</span></h1>
         <p class="subtitle">
-          Nhập tên → bấm <b>Start</b> → xe chạy “hên xui có kỹ thuật” → ai chạm vạch đích trước là <b>winner</b>.
-          (Mỗi lần chạy sẽ khác nhau 😈)
+          Theme: Mood Emojis / F&B Emojis / MoMo Illustration. MoMo Illustration cần bạn <b>Upload MoMo Pack</b> (nhiều ảnh 1 lần) để float theo pack đó.
         </p>
       </div>
-
-      <div class="pill">Tip: <b>Space</b> để Start/Pause · <b>B</b> để Boost ngẫu nhiên</div>
+      <div class="pill">Tip: <b>Space</b> Start/Pause · <b>B</b> Boost ngẫu nhiên</div>
     </header>
 
     <section class="top">
@@ -642,33 +549,21 @@
           </div>
 
           <div class="row">
-            <label for="chaos">Chaos level</label>
-            <div class="input">
-              <span class="muted">🎲</span>
-              <input id="chaos" type="range" min="0" max="100" value="55" />
-              <span id="chaosLabel" class="muted mono" style="min-width:58px;text-align:right">55%</span>
-            </div>
-          </div>
-
-          <div class="row">
             <label for="theme">Theme</label>
             <div class="input">
-              <span class="muted">🌈</span>
+              <span class="muted">🎨</span>
               <select id="theme">
-                <option value="neon" selected>Neon Night</option>
-                <option value="mint">Mint Pop</option>
-                <option value="sunset">Sunset Rave</option>
-                <option value="mono">Cyber Mono</option>
+                <option value="mood" selected>Mood Emojis</option>
+                <option value="fb">F&B Emojis</option>
+                <option value="momo">MoMo Illustration</option>
               </select>
             </div>
           </div>
 
-          <div class="row">
-            <label for="boostChance">Random boost</label>
-            <div class="input">
-              <span class="muted">⚡</span>
-              <input id="boostChance" type="range" min="0" max="30" value="10" />
-              <span id="boostLabel" class="muted mono" style="min-width:58px;text-align:right">10%</span>
+          <div class="row" style="grid-column:1/-1;">
+            <div class="btns" style="margin-top:0;">
+              <button class="ghost" id="uploadMomoPackBtn" title="Upload nhiều ảnh MoMo để theme MoMo Illustration dùng làm floating">Upload MoMo Pack</button>
+              <input id="uploadMomoPackInput" type="file" accept="image/*" multiple style="display:none" />
             </div>
           </div>
         </div>
@@ -676,16 +571,14 @@
         <div class="btns">
           <button class="primary" id="startBtn">Start</button>
           <button class="ghost" id="pauseBtn" disabled>Pause</button>
-          <button class="ghost" id="resetBtn">Reset</button>
-          <button class="ghost" id="shuffleBtn" title="Randomize stats">Shuffle 🎛️</button>
+          <button class="ghost" id="resetBtn">Reset (New round)</button>
           <button class="danger" id="clearBtn" title="Remove all racers">Clear</button>
         </div>
 
         <div class="tip">
           <div class="dot"></div>
-          <div>
-            <b>Gen Z twist:</b> “Chaos” càng cao thì càng dễ có màn lật kèo phút 89.
-            Muốn drama hơn? Tăng <b>Chaos</b> + <b>Random boost</b>.
+          <div id="themeHint">
+            Reset = <b>new round</b> thật sự (random lại “mood speed”). “Upload all list” giúp add nhiều người 1 lần.
           </div>
         </div>
       </div>
@@ -693,11 +586,15 @@
       <div class="roster panel">
         <div class="rosterTop">
           <h3 class="rosterTitle">Racers <span class="pill" id="countPill">0</span></h3>
-          <button class="tiny" id="addBtn">+ Add</button>
+          <div class="btns" style="margin-top:0;">
+            <button class="tiny ghost" id="uploadAllBtn">Upload all list</button>
+            <input id="uploadAllInput" type="file" accept="image/*" multiple style="display:none" />
+            <button class="tiny" id="addBtn">+ Add</button>
+          </div>
         </div>
         <div class="list" id="racerList"></div>
         <div class="toast">
-          <div>Gợi ý: đổi emoji cho vui. Để trống tên = không tham gia.</div>
+          <div>Click avatar để upload lẻ. Hoặc dùng <b>Upload all list</b> để add nhiều người 1 lần.</div>
           <div class="kbd">B</div>
         </div>
       </div>
@@ -714,9 +611,7 @@
         </div>
 
         <div class="progressWrap">
-          <div class="bar" aria-label="Race progress">
-            <i id="raceBar"></i>
-          </div>
+          <div class="bar"><i id="raceBar"></i></div>
           <div class="pct mono" id="racePct">0%</div>
         </div>
       </div>
@@ -724,7 +619,6 @@
       <div class="lanes" id="lanes">
         <div class="finish"></div>
         <div class="finishLabel">FINISH</div>
-        <!-- lanes injected here -->
       </div>
     </section>
   </div>
@@ -742,7 +636,7 @@
         </div>
 
         <div class="winnerHero">
-          <div class="winnerEmoji" id="winnerEmoji">🚀</div>
+          <div class="winnerEmoji" id="winnerEmoji">🏁</div>
           <div style="flex:1">
             <div class="winnerName" id="winnerName">—</div>
             <div class="winnerStats" id="winnerStats">—</div>
@@ -751,36 +645,34 @@
 
         <div class="modalActions">
           <button class="primary" id="replayBtn">Replay</button>
-          <button class="ghost" id="newRaceBtn">New race (shuffle)</button>
-          <button class="ghost" id="resetFromModal">Reset</button>
+          <button class="ghost" id="resetFromModal">Reset (New round)</button>
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    // --- Neon Dash Racing Game (single-file) ---
-    // Core idea: racers have speed + slight randomness (chaos) + occasional boosts.
-    // Winner: first to cross trackLength.
-
     const $ = (s) => document.querySelector(s);
+
     const racerListEl = $("#racerList");
     const lanesEl = $("#lanes");
 
     const startBtn = $("#startBtn");
     const pauseBtn = $("#pauseBtn");
     const resetBtn = $("#resetBtn");
-    const shuffleBtn = $("#shuffleBtn");
     const clearBtn = $("#clearBtn");
     const addBtn = $("#addBtn");
 
+    const uploadAllBtn = $("#uploadAllBtn");
+    const uploadAllInput = $("#uploadAllInput");
+
+    const uploadMomoPackBtn = $("#uploadMomoPackBtn");
+    const uploadMomoPackInput = $("#uploadMomoPackInput");
+
     const raceLengthEl = $("#raceLength");
     const raceLengthLabel = $("#raceLengthLabel");
-    const chaosEl = $("#chaos");
-    const chaosLabel = $("#chaosLabel");
-    const boostChanceEl = $("#boostChance");
-    const boostLabel = $("#boostLabel");
     const themeEl = $("#theme");
+    const themeHint = $("#themeHint");
 
     const statusEl = $("#status");
     const winnerEl = $("#winner");
@@ -792,68 +684,243 @@
     const modal = $("#modal");
     const closeModal = $("#closeModal");
     const replayBtn = $("#replayBtn");
-    const newRaceBtn = $("#newRaceBtn");
     const resetFromModal = $("#resetFromModal");
     const winnerEmojiEl = $("#winnerEmoji");
     const winnerNameEl = $("#winnerName");
     const winnerStatsEl = $("#winnerStats");
 
     const confettiWrap = $("#confetti");
+    const floatingLayer = $("#floatingLayer");
 
     const EMOJIS = ["🏎️","🚗","🚀","🛵","🛹","🐉","🦄","🐙","🦖","🐱","🐶","🍓","🍕","🧋","⚡","🌙","🪩","🔥"];
+
+    // ONLY 3 THEMES
     const THEMES = {
-      neon:  { accent:"#7C4DFF", accent2:"#00E5FF", good:"#3DFF8B", bg0:"#070A12", bg1:"#0B1430" },
-      mint:  { accent:"#00E5A8", accent2:"#00D9FF", good:"#B7FF3D", bg0:"#04110E", bg1:"#072826" },
-      sunset:{ accent:"#FF4D6D", accent2:"#FFCC00", good:"#7C4DFF", bg0:"#12060B", bg1:"#2A0F1B" },
-      mono:  { accent:"#E5E7EB", accent2:"#9CA3AF", good:"#F5F5F5", bg0:"#070707", bg1:"#141414" },
+      mood: { accent:"#FFD34D", accent2:"#FF7AE6", good:"#3DFF8B", bg0:"#06060A", bg1:"#0A0A12" },
+      fb:   { accent:"#FF6FB1", accent2:"#8B5CFF", good:"#3DFF8B", bg0:"#FFE5F1", bg1:"#F3E9FF" },
+      momo: { accent:"#F95396", accent2:"#98CDF4", good:"#3DFF8B", bg0:"#0B0B12", bg1:"#17172A" },
     };
+
+    // MoMo Illustration pack (uploaded locally)
+    let momoPackImages = []; // array of dataURL
 
     let racerInputs = [];
     let racers = [];
-    let lanes = [];
 
     let running = false;
     let finished = false;
+
     let startTime = 0;
-    let lastTs = 0;
     let elapsed = 0;
+
     let rafId = null;
+    let lastTs = 0;
 
     function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
     function rand(a=0, b=1){ return a + Math.random()*(b-a); }
     function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
     function applyTheme(name){
-      const t = THEMES[name] || THEMES.neon;
+      const t = THEMES[name] || THEMES.mood;
       document.documentElement.style.setProperty("--accent", t.accent);
       document.documentElement.style.setProperty("--accent2", t.accent2);
       document.documentElement.style.setProperty("--good", t.good);
       document.documentElement.style.setProperty("--bg0", t.bg0);
       document.documentElement.style.setProperty("--bg1", t.bg1);
+
+      // background per theme
+      if (name === "fb"){
+        document.body.style.background =
+          `radial-gradient(900px 600px at 25% 20%, rgba(255,111,177,.28), transparent 60%),
+           radial-gradient(900px 700px at 80% 18%, rgba(139,92,255,.20), transparent 60%),
+           radial-gradient(700px 500px at 45% 95%, rgba(255,211,77,.14), transparent 60%),
+           linear-gradient(180deg, var(--bg0), var(--bg1))`;
+      } else if (name === "momo"){
+        document.body.style.background =
+          `radial-gradient(1000px 650px at 20% 15%, rgba(249,83,150,.18), transparent 60%),
+           radial-gradient(1000px 700px at 85% 25%, rgba(152,205,244,.16), transparent 55%),
+           radial-gradient(800px 520px at 55% 95%, rgba(119,89,210,.10), transparent 60%),
+           linear-gradient(180deg, var(--bg0), var(--bg1))`;
+      } else {
+        document.body.style.background =
+          `radial-gradient(1000px 600px at 20% 15%, rgba(124,77,255,.22), transparent 60%),
+           radial-gradient(1000px 700px at 85% 25%, rgba(0,229,255,.16), transparent 55%),
+           radial-gradient(700px 500px at 55% 95%, rgba(255,211,77,.10), transparent 60%),
+           linear-gradient(180deg, var(--bg0), var(--bg1))`;
+      }
     }
 
     function setStatus(txt){ statusEl.textContent = txt; }
-
     function formatTime(s){ return s.toFixed(2) + "s"; }
 
     function updateSliders(){
       raceLengthLabel.textContent = `${raceLengthEl.value}px`;
-      chaosLabel.textContent = `${chaosEl.value}%`;
-      boostLabel.textContent = `${boostChanceEl.value}%`;
     }
 
-    function makeRacerRow({name="", emoji=pick(EMOJIS)} = {}){
+    function stopLoop(){
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+
+    function setIcon(containerEl, iconValue){
+      containerEl.innerHTML = "";
+      if (typeof iconValue === "string" && iconValue.startsWith("data:image")) {
+        const img = document.createElement("img");
+        img.src = iconValue;
+        containerEl.appendChild(img);
+      } else {
+        containerEl.textContent = iconValue || "🙂";
+      }
+    }
+
+    // ===== Floating builder =====
+    function clearFloating(){
+      if (!floatingLayer) return;
+      floatingLayer.innerHTML = "";
+    }
+
+    function buildFloatingTheme(themeName){
+      if (!floatingLayer) return;
+      clearFloating();
+
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+
+      // shared stars
+      function addStars(n){
+        for (let i = 0; i < n; i++){
+          const s = document.createElement("div");
+          s.className = "float-star";
+          s.style.left = Math.floor(Math.random() * (W - 10)) + "px";
+          s.style.top  = Math.floor(Math.random() * (H - 10)) + "px";
+          s.style.animationDelay = (Math.random()*1.8).toFixed(2) + "s";
+          floatingLayer.appendChild(s);
+        }
+      }
+
+      // helper: add floating emoji glyphs
+      function addEmojiSet(emojiSet, count){
+        for (let i = 0; i < count; i++){
+          const e = document.createElement("div");
+          e.className = "float-emoji";
+
+          const g = document.createElement("div");
+          g.className = "g";
+          g.textContent = emojiSet[Math.floor(Math.random()*emojiSet.length)];
+
+          const s = Math.floor(44 + Math.random()*64);
+          const x = Math.floor(Math.random() * (W - 60));
+          const y = Math.floor(Math.random() * (H - 60));
+          const r = Math.floor(Math.random()*360);
+          const t = (4.8 + Math.random()*3.6).toFixed(2) + "s";
+          const t2 = (5.6 + Math.random()*4.2).toFixed(2) + "s";
+
+          e.style.setProperty("--s", s + "px");
+          e.style.setProperty("--x", x + "px");
+          e.style.setProperty("--y", y + "px");
+          e.style.setProperty("--r", r + "deg");
+          e.style.setProperty("--t", t);
+          e.style.setProperty("--t2", t2);
+          e.style.opacity = (0.55 + Math.random()*0.40).toFixed(2);
+
+          e.appendChild(g);
+          floatingLayer.appendChild(e);
+        }
+      }
+
+      // helper: add floating images (MoMo pack)
+      function addImageSet(imgSet, count){
+        if (!imgSet || imgSet.length === 0) return;
+        for (let i = 0; i < count; i++){
+          const wrap = document.createElement("div");
+          wrap.className = "float-img";
+
+          const img = document.createElement("img");
+          img.src = imgSet[Math.floor(Math.random()*imgSet.length)];
+
+          const w = Math.floor(72 + Math.random()*80);
+          const x = Math.floor(Math.random() * (W - w));
+          const y = Math.floor(Math.random() * (H - w));
+          const t = (5.2 + Math.random()*4.2).toFixed(2) + "s";
+          const op = (0.55 + Math.random()*0.40).toFixed(2);
+
+          wrap.style.setProperty("--w", w + "px");
+          wrap.style.setProperty("--h", w + "px");
+          wrap.style.setProperty("--x", x + "px");
+          wrap.style.setProperty("--y", y + "px");
+          wrap.style.setProperty("--t", t);
+          wrap.style.setProperty("--op", op);
+
+          wrap.appendChild(img);
+          floatingLayer.appendChild(wrap);
+        }
+      }
+
+      if (themeName === "mood"){
+        const MOOD_SET = ["😵‍💫","🤯","😡","🥶","😱","😈","🤡","😎","🤖","👀","😬","🤩","🥳","😤","😴","🫣","🥲","😇","😏"];
+        addEmojiSet(MOOD_SET, 12);
+        addStars(14);
+        themeHint.innerHTML = `Mood Emojis: emoji “mood” bay lơ lửng ✨`;
+        return;
+      }
+
+      if (themeName === "fb"){
+        // F&B vibe theo ref (đồ ăn + vài mặt cười nhỏ)
+        const FB_SET = ["🍔","🍕","🍩","🍰","🧁","🍎","🍓","🍦","🍭","🍟","🥤","🍫","🥥","🍧","🍡","🍇","😋","🤤","😍","😛"];
+        addEmojiSet(FB_SET, 14);
+        addStars(10);
+        themeHint.innerHTML = `F&B Emojis: đồ ăn + mood ngọt ngào 🍔🍰🍩`;
+        return;
+      }
+
+      if (themeName === "momo"){
+        // MoMo Illustration: floating bằng ảnh upload từ máy (momoPackImages)
+        addImageSet(momoPackImages, 12);
+        addStars(10);
+
+        if (!momoPackImages || momoPackImages.length === 0){
+          themeHint.innerHTML = `MoMo Illustration: bạn chưa upload pack. Bấm <b>Upload MoMo Pack</b> để chọn nhiều ảnh (PNG/JPG) từ máy.`;
+        } else {
+          themeHint.innerHTML = `MoMo Illustration: đang dùng ${momoPackImages.length} ảnh trong pack để floating 💗`;
+        }
+        return;
+      }
+    }
+
+    // ===== Racer list =====
+    function makeRacerRow({name="", emoji=pick(EMOJIS), avatar=null} = {}){
       const wrap = document.createElement("div");
       wrap.className = "racerInput";
 
-      const emojiBox = document.createElement("button");
-      emojiBox.type = "button";
-      emojiBox.className = "emoji";
-      emojiBox.textContent = emoji;
-      emojiBox.title = "Click để đổi emoji";
+      const avatarBox = document.createElement("div");
+      avatarBox.className = "avatarBox";
+      avatarBox.title = "Click để upload ảnh · Double-click để đổi emoji (fallback)";
+
+      const avatarImg = document.createElement("img");
+      const emojiFallback = document.createElement("span");
+      emojiFallback.className = "emojiFallback";
+      emojiFallback.textContent = emoji;
+
+      const hint = document.createElement("span");
+      hint.className = "avatarHint";
+      hint.textContent = "upload";
+
+      const fileInput = document.createElement("input");
+      fileInput.type = "file";
+      fileInput.accept = "image/*";
+      fileInput.style.display = "none";
+
+      if (avatar && avatar.startsWith("data:image")) {
+        avatarImg.src = avatar;
+        avatarBox.appendChild(avatarImg);
+      } else {
+        avatarBox.appendChild(emojiFallback);
+      }
+      avatarBox.appendChild(hint);
+      avatarBox.appendChild(fileInput);
 
       const input = document.createElement("input");
-      input.placeholder = "Nhập tên (vd: bé, Linh, Huy...)";
+      input.placeholder = "Nhập tên (vd: Minh, Linh, Huy...)";
       input.value = name;
 
       const xWrap = document.createElement("div");
@@ -862,15 +929,59 @@
       del.type = "button";
       del.className = "danger tiny";
       del.textContent = "✕";
-
       xWrap.appendChild(del);
-      wrap.appendChild(emojiBox);
+
+      wrap.appendChild(avatarBox);
       wrap.appendChild(input);
       wrap.appendChild(xWrap);
 
-      emojiBox.addEventListener("click", () => {
-        emojiBox.textContent = pick(EMOJIS);
+      const rowObj = {
+        wrap,
+        input,
+        emojiFallback,
+        avatarImg,
+        fileInput,
+        avatarDataURL: (avatar && avatar.startsWith("data:image")) ? avatar : null
+      };
+      racerInputs.push(rowObj);
+      racerListEl.appendChild(wrap);
+
+      avatarBox.addEventListener("click", () => fileInput.click());
+
+      fileInput.addEventListener("change", () => {
+        const file = fileInput.files && fileInput.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          rowObj.avatarDataURL = reader.result;
+
+          avatarBox.innerHTML = "";
+          rowObj.avatarImg = document.createElement("img");
+          rowObj.avatarImg.src = rowObj.avatarDataURL;
+          avatarBox.appendChild(rowObj.avatarImg);
+          avatarBox.appendChild(hint);
+          avatarBox.appendChild(fileInput);
+
+          syncFromInputs();
+          rebuildTrack();
+        };
+        reader.readAsDataURL(file);
+      });
+
+      avatarBox.addEventListener("dblclick", (e) => {
+        e.preventDefault();
+        rowObj.avatarDataURL = null;
+        const newEmoji = pick(EMOJIS);
+        rowObj.emojiFallback.textContent = newEmoji;
+
+        avatarBox.innerHTML = "";
+        avatarBox.appendChild(rowObj.emojiFallback);
+        avatarBox.appendChild(hint);
+        avatarBox.appendChild(fileInput);
+
         syncFromInputs();
+        rebuildTrack();
       });
 
       input.addEventListener("input", () => syncFromInputs());
@@ -882,18 +993,22 @@
         rebuildTrack();
       });
 
-      const rowObj = { wrap, emojiBox, input };
-      racerInputs.push(rowObj);
-      racerListEl.appendChild(wrap);
       syncFromInputs();
       return rowObj;
+    }
+
+    function clearRacerUI(){
+      racerInputs.forEach(r => r.wrap.remove());
+      racerInputs = [];
+      racerListEl.innerHTML = "";
     }
 
     function syncFromInputs(){
       const active = racerInputs
         .map(r => ({
           name: (r.input.value || "").trim(),
-          emoji: r.emojiBox.textContent.trim()
+          avatar: r.avatarDataURL,
+          emoji: r.emojiFallback?.textContent?.trim() || "🙂"
         }))
         .filter(r => r.name.length > 0);
 
@@ -903,34 +1018,29 @@
 
     function buildRacers(){
       const inputData = syncFromInputs();
-      racers = inputData.map((r, idx) => {
-        const base = rand(140, 210);     // base speed
-        const grip = rand(0.86, 0.97);   // friction/grip
-        const accel = rand(38, 58);      // acceleration
-        return {
-          id: idx,
-          name: r.name,
-          emoji: r.emoji,
-          x: 0,
-          v: base * rand(0.40, 0.55),
-          base, accel, grip,
-          boost: 0,
-          bestBoost: 0,
-          finishedAt: null,
-          el: null,
-          statEl: null
-        };
-      });
+      racers = inputData.map((r, idx) => ({
+        id: idx,
+        name: r.name,
+        icon: (r.avatar && r.avatar.startsWith("data:image")) ? r.avatar : r.emoji,
+        x: 0,
+        v: rand(140, 220),
+        targetV: 0,
+        boost: 0,
+        stumble: 0,
+        nextMoodAt: performance.now() + rand(250, 650),
+        bestBoost: 0,
+        finishedAt: null,
+        el: null,
+        statEl: null
+      }));
+      racers.forEach(r => r.targetV = r.v);
     }
 
     function rebuildTrack(){
-      // clear lanes
       lanesEl.querySelectorAll(".lane").forEach(n => n.remove());
-      lanes = [];
-
       buildRacers();
 
-      racers.forEach((r, i) => {
+      racers.forEach((r) => {
         const lane = document.createElement("div");
         lane.className = "lane";
 
@@ -940,7 +1050,7 @@
 
         const bubble = document.createElement("div");
         bubble.className = "bubble";
-        bubble.textContent = r.emoji;
+        setIcon(bubble, r.icon);
 
         const tag = document.createElement("div");
         tag.className = "tag";
@@ -963,10 +1073,8 @@
 
         r.el = kart;
         r.statEl = stat;
-        lanes.push({ lane, kart });
       });
 
-      // reset UI
       winnerEl.textContent = "—";
       timeEl.textContent = formatTime(0);
       raceBarEl.style.width = "0%";
@@ -976,209 +1084,17 @@
       finished = false;
       running = false;
       pauseBtn.disabled = true;
-      startBtn.textContent = "Start";
-      cancelAnimationFrame(rafId);
-      rafId = null;
-      elapsed = 0;
-    }
-
-    function shuffleStats(){
-      // keep names/emojis but randomize physics
-      racers.forEach(r => {
-        r.base  = rand(140, 210);
-        r.grip  = rand(0.86, 0.97);
-        r.accel = rand(38, 58);
-        r.v     = r.base * rand(0.35, 0.55);
-        r.boost = 0;
-        r.bestBoost = 0;
-      });
-    }
-
-    function resetRacePositions(){
-      racers.forEach(r => {
-        r.x = 0;
-        r.v = r.base * rand(0.38, 0.52);
-        r.boost = 0;
-        r.bestBoost = 0;
-        r.finishedAt = null;
-        if (r.el){
-          r.el.classList.remove("win","boost");
-          r.el.style.transform = `translateX(0px)`;
-        }
-        if (r.statEl) r.statEl.textContent = "0%";
-      });
-
-      winnerEl.textContent = "—";
-      timeEl.textContent = formatTime(0);
-      raceBarEl.style.width = "0%";
-      racePctEl.textContent = "0%";
-      elapsed = 0;
-      finished = false;
-      setStatus("idle");
-    }
-
-    function pause(){
-      if (!running) return;
-      running = false;
-      setStatus("paused");
-      pauseBtn.textContent = "Resume";
-      startBtn.disabled = false;
-      cancelAnimationFrame(rafId);
-      rafId = null;
-    }
-
-    function resume(){
-      if (running || finished) return;
-      running = true;
-      setStatus("racing");
-      pauseBtn.textContent = "Pause";
-      startBtn.disabled = true;
-      lastTs = performance.now();
-      rafId = requestAnimationFrame(tick);
-    }
-
-    function start(){
-      // must have >=2 racers for best experience, but allow 1 too
-      if (syncFromInputs().length === 0){
-        // quick nudge
-        flashStatus("Nhập ít nhất 1 tên nha 😅", 1200);
-        return;
-      }
-
-      // If already finished, restart
-      if (finished){
-        resetRacePositions();
-      }
-
-      // build racers fresh from inputs (ensures new list)
-      rebuildTrack();
-      shuffleStats();
-
-      running = true;
-      setStatus("racing");
-      startBtn.disabled = true;
-      pauseBtn.disabled = false;
       pauseBtn.textContent = "Pause";
       startBtn.textContent = "Start";
-
-      startTime = performance.now();
-      lastTs = startTime;
-      elapsed = 0;
-      rafId = requestAnimationFrame(tick);
-    }
-
-    function finish(winner){
-      finished = true;
-      running = false;
-      cancelAnimationFrame(rafId);
-      rafId = null;
-
-      setStatus("finished");
       startBtn.disabled = false;
-      pauseBtn.disabled = true;
-      startBtn.textContent = "Replay";
 
-      winnerEl.textContent = winner.name;
-      winner.el.classList.add("win");
-
-      // show modal + confetti
-      winnerEmojiEl.textContent = winner.emoji;
-      winnerNameEl.textContent = winner.name;
-      winnerStatsEl.textContent = `Finish time: ${formatTime(elapsed)} · Best boost: +${Math.round(winner.bestBoost)} px/s`;
-      showModal();
-      popConfetti(160);
+      stopLoop();
+      elapsed = 0;
+      lastTs = 0;
     }
 
-    function tick(ts){
-      if (!running) return;
-
-      const dt = clamp((ts - lastTs) / 1000, 0, 0.05);
-      lastTs = ts;
-      elapsed = (ts - startTime) / 1000;
-      timeEl.textContent = formatTime(elapsed);
-
-      const chaos = Number(chaosEl.value) / 100;             // 0..1
-      const boostChance = Number(boostChanceEl.value) / 100; // 0..0.3
-      const trackLen = Number(raceLengthEl.value);
-
-      // lane width depends on container
-      const lanesRect = lanesEl.getBoundingClientRect();
-      const finishX = lanesRect.width - 62 - 12; // align with finish line offset
-
-      let bestPct = 0;
-      let leader = null;
-
-      for (const r of racers){
-        if (r.finishedAt) continue;
-
-        // random "micro-chaos" and "momentum"
-        const wobble = (Math.random() - 0.5) * 2; // -1..1
-        const chaosForce = wobble * (r.accel * 0.65) * chaos;
-
-        // occasional boost
-        if (Math.random() < boostChance * dt){
-          r.boost = rand(55, 120) * (0.45 + chaos); // boost intensity
-          r.bestBoost = Math.max(r.bestBoost, r.boost);
-          r.el?.classList.add("boost");
-          setTimeout(() => r.el?.classList.remove("boost"), 220);
-        }
-
-        // decay boost
-        r.boost *= (1 - dt * 2.8);
-        if (r.boost < 0.4) r.boost = 0;
-
-        // accelerate towards base, with friction
-        const target = r.base + r.boost;
-        r.v += (target - r.v) * (dt * 1.3);
-        r.v += chaosForce * dt;
-
-        // grip/friction
-        r.v *= Math.pow(r.grip, dt * 60);
-
-        // move
-        r.x += r.v * dt;
-
-        // percent (based on chosen raceLength slider, not actual px)
-        const pct = clamp((r.x / trackLen) * 100, 0, 100);
-        if (r.statEl) r.statEl.textContent = `${pct.toFixed(0)}%`;
-        bestPct = Math.max(bestPct, pct);
-        if (!leader || r.x > leader.x) leader = r;
-
-        // render translate relative to real lane width
-        // map "raceLength" logical units to real px space so it fits any screen
-        const maxPx = Math.max(40, finishX - 190); // space for tag width
-        const px = clamp((r.x / trackLen) * maxPx, 0, maxPx);
-        if (r.el) r.el.style.transform = `translateX(${px}px)`;
-
-        // finish check
-        if (r.x >= trackLen){
-          r.finishedAt = elapsed;
-          // winner: first to finish
-          finish(r);
-          break;
-        }
-      }
-
-      // progress UI = leader progress
-      const leaderPct = leader ? clamp((leader.x / Number(raceLengthEl.value)) * 100, 0, 100) : bestPct;
-      raceBarEl.style.width = `${leaderPct}%`;
-      racePctEl.textContent = `${leaderPct.toFixed(0)}%`;
-
-      if (!finished) rafId = requestAnimationFrame(tick);
-    }
-
-    function flashStatus(msg, ms=1200){
-      const prev = statusEl.textContent;
-      setStatus(msg);
-      setTimeout(() => setStatus(prev), ms);
-    }
-
-    function showModal(){
-      modal.classList.add("show");
-    }
-    function hideModal(){
-      modal.classList.remove("show");
-    }
+    function showModal(){ modal.classList.add("show"); }
+    function hideModal(){ modal.classList.remove("show"); }
 
     function popConfetti(count=120){
       confettiWrap.innerHTML = "";
@@ -1204,138 +1120,328 @@
         c.style.animationDelay = `${Math.random()*0.25}s`;
         confettiWrap.appendChild(c);
       }
-      // auto clear
       setTimeout(() => (confettiWrap.innerHTML = ""), 2600);
+    }
+
+    function finish(winner){
+      finished = true;
+      running = false;
+      stopLoop();
+
+      setStatus("finished");
+      startBtn.disabled = false;
+      startBtn.textContent = "Replay";
+      pauseBtn.disabled = true;
+
+      winnerEl.textContent = winner.name;
+      winner.el?.classList.add("win");
+
+      setIcon(winnerEmojiEl, winner.icon);
+      winnerNameEl.textContent = winner.name;
+      winnerStatsEl.textContent = `Finish time: ${formatTime(elapsed)} · Best boost: +${Math.round(winner.bestBoost)}`;
+
+      showModal();
+      popConfetti(160);
+    }
+
+    // ===== Smooth Random Engine =====
+    function runLoop(){
+      const trackLen = Number(raceLengthEl.value);
+
+      const lanesRect = lanesEl.getBoundingClientRect();
+      const finishX = lanesRect.width - 62 - 12;
+      const maxPx = Math.max(40, finishX - 190);
+
+      const MIN_V = 120;
+      const MAX_V = 340;
+      const CHANGE_EVERY_MIN = 280; // ms
+      const CHANGE_EVERY_MAX = 950;
+      const SMOOTHING = 0.10;
+
+      const BOOST_CHANCE = 0.12;   // per second
+      const STUMBLE_CHANCE = 0.09; // per second
+      const BOOST_MIN = 60,  BOOST_MAX = 160;
+      const STUMBLE_MIN = 45, STUMBLE_MAX = 140;
+
+      startTime = performance.now() - (elapsed * 1000);
+      if (!lastTs) lastTs = performance.now();
+
+      stopLoop();
+      rafId = requestAnimationFrame(frame);
+
+      function frame(ts){
+        if (!running || finished){
+          rafId = requestAnimationFrame(frame);
+          return;
+        }
+
+        const dt = clamp((ts - lastTs) / 1000, 0, 0.05);
+        lastTs = ts;
+
+        elapsed = (performance.now() - startTime) / 1000;
+        timeEl.textContent = formatTime(elapsed);
+
+        let leader = racers[0] || null;
+
+        for (const r of racers){
+          if (!leader || r.x > leader.x) leader = r;
+
+          if (ts >= r.nextMoodAt){
+            const mid = (MIN_V + MAX_V) / 2;
+            const spread = (MAX_V - MIN_V) / 2;
+            const bias = (Math.random() - 0.5) * 0.9;
+            r.targetV = clamp(mid + bias * spread * 2, MIN_V, MAX_V);
+            r.nextMoodAt = ts + rand(CHANGE_EVERY_MIN, CHANGE_EVERY_MAX);
+          }
+
+          if (Math.random() < BOOST_CHANCE * dt){
+            const b = rand(BOOST_MIN, BOOST_MAX);
+            r.boost = Math.max(r.boost, b);
+            r.bestBoost = Math.max(r.bestBoost, b);
+            r.el?.classList.add("boost");
+            setTimeout(() => r.el?.classList.remove("boost"), 160);
+          }
+          if (Math.random() < STUMBLE_CHANCE * dt){
+            r.stumble = Math.max(r.stumble, rand(STUMBLE_MIN, STUMBLE_MAX));
+          }
+
+          r.boost *= (1 - dt * 2.6);
+          r.stumble *= (1 - dt * 3.2);
+          if (r.boost < 1) r.boost = 0;
+          if (r.stumble < 1) r.stumble = 0;
+
+          r.v = r.v + (r.targetV - r.v) * SMOOTHING;
+          const effV = Math.max(30, r.v + r.boost - r.stumble);
+
+          r.x += effV * dt;
+
+          const pct = clamp((r.x / trackLen) * 100, 0, 100);
+          if (r.statEl) r.statEl.textContent = `${pct.toFixed(0)}%`;
+
+          const px = clamp((r.x / trackLen) * maxPx, 0, maxPx);
+          if (r.el) r.el.style.transform = `translateX(${px}px)`;
+
+          if (r.x >= trackLen && !r.finishedAt){
+            r.finishedAt = elapsed;
+            finish(r);
+            return;
+          }
+        }
+
+        const leaderPct = leader ? clamp((leader.x / trackLen) * 100, 0, 100) : 0;
+        raceBarEl.style.width = `${leaderPct}%`;
+        racePctEl.textContent = `${leaderPct.toFixed(0)}%`;
+
+        rafId = requestAnimationFrame(frame);
+      }
+    }
+
+    function startRace(){
+      if (syncFromInputs().length === 0){
+        setStatus("Nhập ít nhất 1 tên nha 😅");
+        setTimeout(() => setStatus("idle"), 1000);
+        return;
+      }
+
+      hideModal();
+      rebuildTrack();
+
+      running = true;
+      finished = false;
+      setStatus("racing");
+      startBtn.disabled = true;
+      pauseBtn.disabled = false;
+      pauseBtn.textContent = "Pause";
+      startBtn.textContent = "Start";
+
+      runLoop();
+    }
+
+    function pause(){
+      if (!running) return;
+      running = false;
+      setStatus("paused");
+      pauseBtn.textContent = "Resume";
+      startBtn.disabled = false;
+    }
+
+    function resume(){
+      if (running || finished) return;
+      running = true;
+      setStatus("racing");
+      pauseBtn.textContent = "Pause";
+      startBtn.disabled = true;
+      if (!rafId) runLoop();
     }
 
     function manualBoost(){
       if (!running || finished) return;
       if (racers.length === 0) return;
       const r = pick(racers);
-      r.boost = Math.max(r.boost, rand(85, 150));
-      r.bestBoost = Math.max(r.bestBoost, r.boost);
+      const b = rand(90, 200);
+      r.boost = Math.max(r.boost, b);
+      r.bestBoost = Math.max(r.bestBoost, b);
       r.el?.classList.add("boost");
-      setTimeout(() => r.el?.classList.remove("boost"), 260);
-      flashStatus(`Boost cho ${r.name} ⚡`, 650);
+      setTimeout(() => r.el?.classList.remove("boost"), 180);
+      setStatus(`Boost cho ${r.name} ⚡`);
+      setTimeout(() => setStatus("racing"), 650);
     }
 
-    // --- Events ---
-    raceLengthEl.addEventListener("input", updateSliders);
-    chaosEl.addEventListener("input", updateSliders);
-    boostChanceEl.addEventListener("input", updateSliders);
+    function newRoundReset(){
+      hideModal();
+      confettiWrap.innerHTML = "";
+      elapsed = 0;
+      lastTs = 0;
+      winnerEl.textContent = "—";
+      timeEl.textContent = formatTime(0);
+      raceBarEl.style.width = "0%";
+      racePctEl.textContent = "0%";
+      rebuildTrack();
+    }
 
-    themeEl.addEventListener("change", () => applyTheme(themeEl.value));
+    // ===== Upload all list =====
+    function filenameToName(filename){
+      return filename.replace(/\.[^/.]+$/, "").replace(/[_-]+/g, " ").trim();
+    }
+
+    function readFileAsDataURL(file){
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function handleUploadAll(files){
+      if (!files || files.length === 0) return;
+
+      // stop race & reset UI
+      stopLoop();
+      running = false;
+      finished = false;
+      setStatus("idle");
+
+      // replace entire racer list with uploaded files
+      clearRacerUI();
+
+      // build rows in order
+      for (const file of files){
+        const dataURL = await readFileAsDataURL(file);
+        makeRacerRow({
+          name: filenameToName(file.name),
+          emoji: pick(EMOJIS),
+          avatar: dataURL
+        });
+      }
+
+      rebuildTrack();
+    }
+
+    // ===== Upload MoMo pack (for floating) =====
+    async function handleUploadMomoPack(files){
+      if (!files || files.length === 0) return;
+      momoPackImages = [];
+      for (const file of files){
+        const dataURL = await readFileAsDataURL(file);
+        momoPackImages.push(dataURL);
+      }
+      if (themeEl.value === "momo") buildFloatingTheme("momo");
+    }
+
+    // ===== Events =====
+    raceLengthEl.addEventListener("input", updateSliders);
+
+    themeEl.addEventListener("change", () => {
+      applyTheme(themeEl.value);
+      buildFloatingTheme(themeEl.value);
+    });
+
+    window.addEventListener("resize", () => buildFloatingTheme(themeEl.value));
 
     addBtn.addEventListener("click", () => {
-      makeRacerRow({ name:"", emoji: pick(EMOJIS) });
+      makeRacerRow({ name:"", emoji: pick(EMOJIS), avatar: null });
       rebuildTrack();
     });
 
     clearBtn.addEventListener("click", () => {
-      racerInputs.forEach(r => r.wrap.remove());
-      racerInputs = [];
+      clearRacerUI();
       rebuildTrack();
       syncFromInputs();
     });
 
-    shuffleBtn.addEventListener("click", () => {
-      if (racers.length === 0) rebuildTrack();
-      shuffleStats();
-      flashStatus("Shuffled 🎛️", 900);
-    });
-
-    resetBtn.addEventListener("click", () => {
-      hideModal();
-      resetRacePositions();
-    });
+    resetBtn.addEventListener("click", () => newRoundReset());
+    resetFromModal.addEventListener("click", () => newRoundReset());
 
     startBtn.addEventListener("click", () => {
-      hideModal();
       if (finished){
-        // replay without rebuilding list
-        resetRacePositions();
-        shuffleStats();
-        resume();
-        pauseBtn.disabled = false;
-        startBtn.disabled = true;
+        newRoundReset();
+        startRace();
         return;
       }
-      start();
+      startRace();
     });
 
     pauseBtn.addEventListener("click", () => {
-      if (!running && !finished){
-        resume();
-      } else {
-        pause();
-        startBtn.disabled = false;
-      }
+      if (!running && !finished) resume();
+      else pause();
     });
 
-    closeModal.addEventListener("click", hideModal);
+    closeModal.addEventListener("click", () => hideModal());
     modal.addEventListener("click", (e) => { if (e.target === modal) hideModal(); });
 
     replayBtn.addEventListener("click", () => {
       hideModal();
-      resetRacePositions();
-      shuffleStats();
-      resume();
-      pauseBtn.disabled = false;
-      startBtn.disabled = true;
-    });
-
-    newRaceBtn.addEventListener("click", () => {
-      hideModal();
-      resetRacePositions();
-      shuffleStats();
-      flashStatus("New race (shuffled) 🧪", 900);
-    });
-
-    resetFromModal.addEventListener("click", () => {
-      hideModal();
-      resetRacePositions();
+      startRace();
     });
 
     window.addEventListener("keydown", (e) => {
       if (e.code === "Space"){
         e.preventDefault();
         if (finished){
-          hideModal();
-          resetRacePositions();
-          shuffleStats();
-          resume();
-          pauseBtn.disabled = false;
-          startBtn.disabled = true;
+          newRoundReset();
+          startRace();
           return;
         }
         if (!running){
           if (syncFromInputs().length === 0) return;
-          // if idle -> start, if paused -> resume
-          if (statusEl.textContent === "idle") start();
+          if (statusEl.textContent === "idle") startRace();
           else resume();
           pauseBtn.disabled = false;
         } else {
           pause();
-          startBtn.disabled = false;
         }
       }
       if (e.key.toLowerCase() === "b") manualBoost();
     });
 
-    // --- Init ---
-    (function init(){
-      applyTheme("neon");
-      updateSliders();
+    // Upload all list button
+    uploadAllBtn.addEventListener("click", () => uploadAllInput.click());
+    uploadAllInput.addEventListener("change", async () => {
+      const files = Array.from(uploadAllInput.files || []);
+      await handleUploadAll(files);
+      uploadAllInput.value = "";
+    });
 
-      // default racers
-      makeRacerRow({ name:"bé", emoji:"🦄" });
-      makeRacerRow({ name:"Linh", emoji:"🛵" });
-      makeRacerRow({ name:"Huy", emoji:"🚀" });
-      makeRacerRow({ name:"Trang", emoji:"🏎️" });
+    // Upload MoMo pack button
+    uploadMomoPackBtn.addEventListener("click", () => uploadMomoPackInput.click());
+    uploadMomoPackInput.addEventListener("change", async () => {
+      const files = Array.from(uploadMomoPackInput.files || []);
+      await handleUploadMomoPack(files);
+      uploadMomoPackInput.value = "";
+    });
+
+    // ===== Init =====
+    (function init(){
+      updateSliders();
+      applyTheme("mood");
+      buildFloatingTheme("mood");
+
+      // default: 1 empty row
+      makeRacerRow({ name:"", emoji:"🎯", avatar: null });
 
       rebuildTrack();
     })();
   </script>
 </body>
 </html>
-

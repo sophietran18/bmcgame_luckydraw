@@ -702,7 +702,73 @@
     };
 
     // MoMo Illustration pack (uploaded locally)
-    let momoPackImages = []; // array of dataURL
+   // ===== MoMo Illustration pack: hard-code list (Cách 1) =====
+// Lưu ý: encodeURIComponent để xử lý khoảng trắng, dấu +, dấu tiếng Việt...
+const MOMO_ASSET_NAMES = [
+  // (đã có trước) + (bổ sung từ screenshot mới)
+  "Mkt solution_Chu cua hang_01.png",
+  "Mkt solution_Chu cua hang_02.png",
+  "Mkt solution_Chu cua hang_03.png",
+  "Mkt solution_Chu cua hang_04.png",
+  "Mkt solution_Chu cua hang_05.png",
+  "Mkt solution_Chu cua hang_06.png",
+  "Mkt solution_Chu cua hang_07.png",
+  "Mkt solution_Chu cua hang_08.png",
+  "Mkt solution_Chu cua hang_09.png",
+
+  "Mkt solution_Cua hang cf mua sam_03.png",
+  "Mkt solution_Cua hang cf mua sam_04.png",
+  "Mkt solution_Cua hang cf mua sam_05.png",
+  "Mkt solution_Cua hang cf mua sam_06.png",
+
+  "Mkt solution_FnB lam dep_01.png",
+  "Mkt solution_FnB lam dep_02.png",
+  "Mkt solution_FnB lam dep_03.png",
+  "Mkt solution_FnB lam dep_05.png",
+  "Mkt solution_FnB lam dep_06.png",
+
+  "Mkt solution_Giam gia qua voucher_03.png",
+  "Mkt solution_Giam gia qua voucher_04.png",
+
+  // ===== bổ sung từ screenshot mới =====
+  "Mkt solution_Giam gia qua voucher_05.png",
+
+  "Mkt solution_Mua sam an uong_01.png",
+  "Mkt solution_Mua sam an uong_02.png",
+  "Mkt solution_Mua sam an uong_03.png",
+  "Mkt solution_Mua sam an uong_04.png",
+  "Mkt solution_Mua sam an uong_05.png",
+
+  "Mkt solution_giam gia qua voucher_01.png",
+  "Mkt solution_giam gia qua voucher_02.png",
+
+  "TTT_Cf tra sua_01.png",
+  "TTT_Cf tra sua_02.png",
+  "TTT_Cf tra sua_03.png",
+
+  "TTT_Tui +_01.png",
+  "TTT_Tui +_02.png",
+  "TTT_Tui +_03.png",
+
+  "TTT_chart tang truong_03.png",
+
+  "TTT_dong xu_01.png",
+  "TTT_dong xu_02.png",
+  "TTT_dong xu_03.png",
+
+  "TTT_fast food_01.png",
+  "TTT_fast food_02.png",
+  "TTT_fast food_03.png",
+  "TTT_fast food_04.png",
+
+  "TTT_shopping bag_01.png",
+  "TTT_shopping bag_02.png",
+  "TTT_shopping bag_03.png",
+];
+
+// Build final URLs (safe for spaces/+)
+let momoPackImages = MOMO_ASSET_NAMES.map(name => `assets/momo/${encodeURIComponent(name)}`);
+
 
     let racerInputs = [];
     let racers = [];
@@ -1445,3 +1511,4 @@
   </script>
 </body>
 </html>
+

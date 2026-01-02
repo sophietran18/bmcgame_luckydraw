@@ -1,1588 +1,401 @@
 <!doctype html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Racing Game — BMC Marketing Transformation</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Racing Game — BMC</title>
 
-  <style>
-    :root{
-      --bg0:#0B0B12;
-      --bg1:#17172A;
+<style>
+:root{
+  --bg0:#FFE5F1;
+  --bg1:#F3E9FF;
+  --txt: rgba(20,20,30,.92);
+  --muted: rgba(20,20,30,.62);
+  --stroke: rgba(0,0,0,.12);
+  --radius: 20px;
+  --shadow: 0 16px 48px rgba(0,0,0,.18);
+}
 
-      --txt: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.65);
+/* ===== Base ===== */
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family: system-ui,-apple-system,Segoe UI,Roboto;
+  background:
+    radial-gradient(900px 600px at 25% 20%, rgba(255,111,177,.25), transparent 60%),
+    radial-gradient(900px 700px at 80% 18%, rgba(139,92,255,.22), transparent 60%),
+    linear-gradient(180deg,var(--bg0),var(--bg1));
+  color:var(--txt);
+}
+.wrap{
+  max-width:1200px;
+  margin:0 auto;
+  padding:24px;
+}
 
-      --stroke: rgba(255,255,255,.14);
-      --shadow: 0 18px 60px rgba(0,0,0,.55);
-      --radius: 22px;
+/* ===== Header ===== */
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  margin-bottom:16px;
+}
+h1{margin:0;font-size:38px}
+.subtitle{color:var(--muted)}
+.tip{
+  font-size:13px;
+  padding:8px 12px;
+  border-radius:999px;
+  background:rgba(0,0,0,.08);
+}
 
-      --accent:#7C4DFF;
-      --accent2:#00E5FF;
-      --good:#3DFF8B;
-      --bad:#FF4D6D;
-    }
+/* ===== Panels ===== */
+.panel{
+  background:rgba(255,255,255,.55);
+  backdrop-filter: blur(16px);
+  border-radius:var(--radius);
+  border:1px solid var(--stroke);
+  box-shadow:var(--shadow);
+}
 
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
-    body{
-      margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
-      color: var(--txt);
-      background:
-        radial-gradient(1000px 650px at 20% 15%, rgba(255,111,177,.28), transparent 60%),
-        radial-gradient(1000px 700px at 85% 25%, rgba(139,92,255,.20), transparent 55%),
-        radial-gradient(800px 520px at 55% 95%, rgba(255,211,77,.14), transparent 60%),
-        linear-gradient(180deg, var(--bg0), var(--bg1));
-      overflow-x:hidden;
-    }
+/* ===== TOP AREA ===== */
+.top{
+  display:grid;
+  grid-template-columns: 1.2fr .8fr;
+  gap:14px;
+  margin-bottom:14px;
+}
+@media(max-width:900px){
+  .top{grid-template-columns:1fr}
+}
 
-    .noise{
-      pointer-events:none;
-      position:fixed; inset:0;
-      opacity:.08;
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.65'/%3E%3C/svg%3E");
-      mix-blend-mode: overlay;
-      z-index: 5;
-    }
+/* ===== SETTINGS ===== */
+.controls{padding:16px}
+.row{margin-bottom:12px}
+label{font-size:13px;color:var(--muted)}
+.input{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  background:rgba(0,0,0,.08);
+  padding:10px 12px;
+  border-radius:12px;
+}
+input[type=range],select{
+  flex:1;
+}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+button{
+  padding:10px 14px;
+  border-radius:12px;
+  border:0;
+  cursor:pointer;
+  font-weight:600;
+}
+.primary{background:#6C7CFF;color:white}
+.ghost{background:#E6E6F0}
+.danger{background:#FFD6DE}
 
-    /* Floating layer */
-    .floating-layer{
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      overflow: hidden;
-    }
-    .float-emoji{
-      position:absolute;
-      display:grid; place-items:center;
-      transform: translate3d(0,0,0);
-      will-change: transform;
-      opacity: var(--op, .88);
-      animation: floaty var(--t, 6s) ease-in-out infinite;
-      filter:
-        drop-shadow(0 18px 40px rgba(0,0,0,.35))
-        drop-shadow(0 0 22px rgba(0,0,0,.10));
-    }
-    .float-emoji .g{
-      font-size: var(--s, 56px);
-      line-height: 1;
-      transform: rotate(var(--r, 0deg));
-      animation: spinny var(--t2, 7s) ease-in-out infinite;
-      text-shadow: 0 10px 22px rgba(0,0,0,.28);
-    }
-    .float-emoji::after{
-      content:"";
-      position:absolute;
-      width: 60%;
-      height: 60%;
-      border-radius: 999px;
-      top: 10%;
-      left: 15%;
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.28), transparent 60%);
-      filter: blur(2px);
-      opacity:.7;
-      transform: rotate(12deg);
-    }
+/* ===== RACERS ===== */
+.roster{padding:16px;display:flex;flex-direction:column}
+.rosterTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:8px;
+}
+.list{
+  max-height:260px;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  padding-right:4px;
+}
+.racer{
+  display:grid;
+  grid-template-columns: 44px 1fr 32px;
+  gap:8px;
+  align-items:center;
+  background:rgba(0,0,0,.06);
+  padding:8px;
+  border-radius:12px;
+}
+.avatar{
+  width:44px;height:32px;
+  border-radius:10px;
+  background:#ddd;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+.avatar img{width:100%;height:100%;object-fit:cover;border-radius:10px}
+.racer input{
+  border:0;
+  background:transparent;
+  outline:none;
+}
+.racer .x{
+  background:#F3B6C0;
+  border-radius:999px;
+  text-align:center;
+  cursor:pointer;
+}
 
-    .float-img{
-      position:absolute;
-      width: var(--w, 92px);
-      height: var(--h, 92px);
-      opacity: var(--op, .85);
-      transform: translate3d(0,0,0);
-      will-change: transform;
-      animation: floaty var(--t, 6.2s) ease-in-out infinite;
-      filter: drop-shadow(0 18px 40px rgba(0,0,0,.28));
-    }
-    .float-img img{
-      width:100%; height:100%;
-      object-fit:contain;
-      display:block;
-    }
+/* ===== TRACK ===== */
+.track{padding:16px}
+.trackTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+}
+.progress{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.bar{
+  width:200px;height:10px;
+  background:rgba(0,0,0,.12);
+  border-radius:999px;
+  overflow:hidden;
+}
+.bar i{
+  display:block;
+  height:100%;
+  width:0%;
+  background:#6C7CFF;
+}
+.lanes{
+  position:relative;
+  background:rgba(0,0,0,.06);
+  border-radius:16px;
+  overflow:hidden;
+}
+.lane{
+  height:56px;
+  border-top:1px dashed rgba(0,0,0,.12);
+  position:relative;
+}
+.kart{
+  position:absolute;
+  left:8px;
+  top:50%;
+  transform:translateY(-50%);
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.bubble{
+  width:36px;height:36px;
+  border-radius:10px;
+  background:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.tag{
+  background:rgba(255,255,255,.7);
+  padding:6px 10px;
+  border-radius:10px;
+  font-size:13px;
+}
 
-    .float-star{
-      position:absolute;
-      width: 6px; height: 6px;
-      border-radius: 2px;
-      background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(0,229,255,.55));
-      box-shadow:
-        0 0 14px rgba(124,77,255,.18),
-        0 0 10px rgba(0,229,255,.14);
-      opacity: .75;
-      animation: twinkle 2.8s ease-in-out infinite;
-    }
-
-    @keyframes floaty{
-      0%   { transform: translate3d(var(--x,0px), calc(var(--y,0px) + 14px), 0) rotate(0.001deg); }
-      50%  { transform: translate3d(calc(var(--x,0px) + 10px), calc(var(--y,0px) - 18px), 0) rotate(0.001deg); }
-      100% { transform: translate3d(var(--x,0px), calc(var(--y,0px) + 14px), 0) rotate(0.001deg); }
-    }
-    @keyframes spinny{
-      0% { transform: rotate(calc(var(--r,0deg) - 8deg)); }
-      50% { transform: rotate(calc(var(--r,0deg) + 10deg)); }
-      100% { transform: rotate(calc(var(--r,0deg) - 8deg)); }
-    }
-    @keyframes twinkle{
-      0%,100% { transform: scale(.85) rotate(12deg); opacity:.55; }
-      50% { transform: scale(1.15) rotate(-10deg); opacity:.95; }
-    }
-
-    .wrap{
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 26px 18px 34px;
-      position: relative;
-      z-index: 2;
-    }
-
-    header{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:16px;
-      margin-bottom:16px;
-    }
-    .brand{ display:flex; flex-direction:column; gap:6px; }
-    .title{
-      margin:0;
-      font-size: clamp(28px, 4vw, 44px);
-      letter-spacing:-.02em;
-      line-height:1.05;
-      display:flex; align-items:center; gap:12px;
-    }
-    .badge{
-      font-size:.78rem;
-      padding:7px 12px;
-      border-radius:999px;
-      border:1px solid var(--stroke);
-      background: rgba(0,0,0,.18);
-      color: var(--muted);
-      backdrop-filter: blur(10px);
-    }
-    .subtitle{
-      margin:0;
-      font-size: 1rem;
-      color: var(--muted);
-    }
-    .tipPill{
-      font-size:.86rem;
-      padding:8px 12px;
-      border-radius:999px;
-      border:1px solid var(--stroke);
-      background: rgba(0,0,0,.18);
-      color: var(--muted);
-      backdrop-filter: blur(10px);
-      white-space:nowrap;
-    }
-
-    .panel{
-      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
-      border:1px solid var(--stroke);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-    }
-
-    .top{
-      display:grid;
-      grid-template-columns: 1.25fr .75fr;
-      gap:14px;
-      margin-bottom:14px;
-      align-items: start;
-    }
-    @media (max-width: 980px){
-      .top{ grid-template-columns: 1fr; }
-      .tipPill{ white-space: normal; }
-    }
-
-    .controls{ padding:16px; }
-    .roster{ padding:16px; }
-
-    .grid2{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:10px;
-      align-items:start;
-    }
-    @media (max-width: 620px){
-      .grid2{ grid-template-columns: 1fr; }
-    }
-
-    label{
-      display:block;
-      font-size:.86rem;
-      color: var(--muted);
-      margin-bottom:6px;
-    }
-    .input{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding:12px 12px;
-      background: rgba(0,0,0,.22);
-      border:1px solid rgba(255,255,255,.14);
-      border-radius: 14px;
-      transition: .18s ease;
-    }
-    .input:focus-within{
-      border-color: rgba(124,77,255,.45);
-      box-shadow: 0 0 0 4px rgba(124,77,255,.12);
-    }
-    .input input, .input select{
-      width:100%;
-      border:0;
-      outline:none;
-      background:transparent;
-      color: var(--txt);
-      font-size: 0.98rem;
-    }
-
-    .btns{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-top:12px;
-    }
-    button{
-      border:0;
-      cursor:pointer;
-      color: var(--txt);
-      border-radius: 14px;
-      padding: 11px 13px;
-      font-weight: 700;
-      letter-spacing:.01em;
-      background: rgba(255,255,255,.09);
-      border: 1px solid rgba(255,255,255,.16);
-      transition: transform .08s ease, background .18s ease, border-color .18s ease;
-      user-select:none;
-    }
-    button:hover{ background: rgba(255,255,255,.12); }
-    button:active{ transform: translateY(1px) scale(.99); }
-
-    .primary{
-      background: linear-gradient(90deg, rgba(124,77,255,.92), rgba(0,229,255,.82));
-      border-color: rgba(255,255,255,.18);
-      box-shadow: 0 12px 40px rgba(124,77,255,.22);
-    }
-    .ghost{
-      background: rgba(0,0,0,.18);
-      border-color: rgba(255,255,255,.14);
-    }
-    .danger{
-      background: rgba(255,77,109,.14);
-      border-color: rgba(255,77,109,.30);
-    }
-    .tiny{
-      padding:8px 10px;
-      border-radius: 12px;
-      font-size:.92rem;
-      font-weight:700;
-    }
-
-    .tipLine{
-      margin-top:10px;
-      color: var(--muted);
-      font-size:.92rem;
-      line-height:1.35;
-      display:flex;
-      gap:10px;
-      align-items:flex-start;
-    }
-    .dot{
-      width:10px; height:10px; margin-top:4px;
-      border-radius:999px;
-      background: linear-gradient(180deg, var(--accent), var(--accent2));
-      box-shadow: 0 0 0 5px rgba(124,77,255,.10);
-      flex: 0 0 auto;
-    }
-
-    /* Roster header */
-    .rosterTop{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-      margin-bottom:10px;
-    }
-    .rosterTitle{
-      margin:0;
-      font-size: 1.05rem;
-      letter-spacing:-.01em;
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-    .pill{
-      font-size:.78rem;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.16);
-      background: rgba(0,0,0,.16);
-      color: var(--muted);
-    }
-
-    .list{ display:flex; flex-direction:column; gap:10px; }
-
-    .racerInput{
-      display:grid;
-      grid-template-columns: 62px 1fr 60px;
-      gap:10px;
-      align-items:center;
-      padding:10px;
-      background: rgba(0,0,0,.14);
-      border:1px solid rgba(255,255,255,.12);
-      border-radius: 16px;
-    }
-
-    .avatarBox{
-      width:62px; height:44px;
-      border-radius:14px;
-      background: rgba(255,255,255,.07);
-      border:1px solid rgba(255,255,255,.12);
-      display:flex; align-items:center; justify-content:center;
-      overflow:hidden;
-      cursor:pointer;
-      position:relative;
-    }
-    .avatarBox:hover{
-      border-color: rgba(0,229,255,.30);
-      box-shadow: 0 0 0 4px rgba(0,229,255,.08);
-    }
-    .avatarBox img{
-      width:100%; height:100%;
-      object-fit:cover;
-      border-radius:14px;
-      display:block;
-    }
-    .emojiFallback{ font-size:1.55rem; line-height:1; }
-    .avatarHint{
-      position:absolute;
-      right:4px; bottom:4px;
-      font-size:10px;
-      padding:2px 6px;
-      border-radius:999px;
-      background: rgba(0,0,0,.35);
-      border:1px solid rgba(255,255,255,.14);
-      color: rgba(255,255,255,.78);
-      backdrop-filter: blur(10px);
-      pointer-events:none;
-    }
-
-    .racerInput input{
-      width:100%;
-      border:0; outline:none;
-      background:transparent;
-      color: var(--txt);
-      font-size:1rem;
-    }
-    .racerInput input::placeholder{ color: rgba(255,255,255,.45); }
-
-    .toast{
-      margin-top: 10px;
-      font-size:.95rem;
-      color: var(--muted);
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      padding: 10px 12px;
-      border-radius: 16px;
-      border: 1px dashed rgba(255,255,255,.18);
-      background: rgba(0,0,0,.12);
-    }
-    .kbd{
-      font-size:.78rem;
-      padding:4px 8px;
-      border-radius: 10px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.08);
-      color: var(--txt);
-      font-variant-numeric: tabular-nums;
-      white-space:nowrap;
-    }
-
-    /* Track */
-    .track{ padding:16px; position:relative; }
-    .trackTop{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-end;
-      gap:12px;
-      margin-bottom: 10px;
-    }
-    .meta{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-      color: var(--muted);
-      font-size:.92rem;
-    }
-    .meta b{ color: var(--txt); }
-
-    .progressWrap{
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-    .bar{
-      width: 220px;
-      max-width: 40vw;
-      height: 12px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.14);
-      overflow:hidden;
-    }
-    .bar > i{
-      display:block;
-      height:100%;
-      width:0%;
-      background: linear-gradient(90deg, rgba(124,77,255,.95), rgba(0,229,255,.85), rgba(61,255,139,.75));
-      border-radius: 999px;
-      transition: width .08s linear;
-    }
-    .pct{
-      min-width: 44px;
-      text-align:right;
-      font-variant-numeric: tabular-nums;
-      color: var(--txt);
-      opacity:.9;
-    }
-
-    .lanes{
-      position:relative;
-      border-radius: 18px;
-      border:1px solid rgba(255,255,255,.12);
-      background:
-        linear-gradient(180deg, rgba(0,0,0,.16), rgba(0,0,0,.06));
-      overflow:hidden;
-    }
-    .finish{
-      position:absolute;
-      top:0; bottom:0;
-      right: 62px;
-      width: 16px;
-      background:
-        repeating-linear-gradient(180deg, rgba(255,255,255,.9) 0 10px, rgba(0,0,0,.65) 10px 20px);
-      opacity:.85;
-      box-shadow: 0 0 0 1px rgba(255,255,255,.18);
-    }
-    .finishLabel{
-      position:absolute;
-      right: 18px;
-      top: 10px;
-      font-size:.78rem;
-      color: var(--muted);
-      background: rgba(0,0,0,.22);
-      border: 1px solid rgba(255,255,255,.12);
-      padding: 6px 10px;
-      border-radius: 999px;
-      backdrop-filter: blur(10px);
-    }
-    .lane{
-      height: 62px;
-      position:relative;
-      display:flex;
-      align-items:center;
-      padding: 6px 12px;
-      border-top:1px solid rgba(255,255,255,.08);
-      background: linear-gradient(90deg, rgba(255,255,255,.03), transparent 45%);
-    }
-    .lane:first-child{ border-top:0; }
-
-    .lane:after{
-      content:"";
-      position:absolute; left:0; right:0; bottom:10px;
-      height:2px;
-      background: repeating-linear-gradient(90deg, rgba(255,255,255,.10) 0 12px, transparent 12px 26px);
-      opacity:.55;
-      pointer-events:none;
-    }
-
-    .kart{
-      position:absolute;
-      left: 12px;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      transform: translateX(0);
-      transition: filter .12s ease;
-    }
-    .kart .bubble{
-      width:46px; height:46px;
-      display:grid; place-items:center;
-      border-radius: 16px;
-      background: rgba(255,255,255,.10);
-      border:1px solid rgba(255,255,255,.14);
-      box-shadow: 0 10px 30px rgba(0,0,0,.20);
-      overflow:hidden;
-      font-size: 1.5rem;
-    }
-    .kart .bubble img{
-      width:100%; height:100%;
-      object-fit:cover;
-      border-radius:16px;
-      display:block;
-    }
-    .kart .tag{
-      padding: 8px 10px;
-      border-radius: 16px;
-      background: rgba(0,0,0,.20);
-      border:1px solid rgba(255,255,255,.14);
-      backdrop-filter: blur(10px);
-      display:flex;
-      gap:10px;
-      align-items:baseline;
-      min-width: 160px;
-      max-width: 44vw;
-    }
-    .kart .name{
-      font-weight: 800;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow: ellipsis;
-    }
-    .kart .stat{
-      font-size:.82rem;
-      color: var(--muted);
-      font-variant-numeric: tabular-nums;
-      margin-left:auto;
-      white-space:nowrap;
-    }
-    .kart.win{ filter: drop-shadow(0 0 18px rgba(61,255,139,.18)); }
-    .kart.boost{ filter: drop-shadow(0 0 22px rgba(0,229,255,.18)); }
-
-    /* Modal */
-    .modal{
-      position:fixed; inset:0;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding:18px;
-      background: rgba(0,0,0,.55);
-      backdrop-filter: blur(10px);
-      z-index: 50;
-    }
-    .modal.show{ display:flex; }
-    .modalCard{
-      width:min(680px, 96vw);
-      border-radius: 26px;
-      border:1px solid rgba(255,255,255,.18);
-      background:
-        radial-gradient(900px 420px at 20% 10%, rgba(124,77,255,.28), transparent 60%),
-        radial-gradient(800px 420px at 85% 20%, rgba(0,229,255,.22), transparent 55%),
-        linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
-      box-shadow: 0 24px 80px rgba(0,0,0,.62);
-      overflow:hidden;
-      position:relative;
-    }
-    .modalInner{ padding:18px; }
-    .modalTop{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .winnerTitle{
-      margin:0;
-      font-size: clamp(20px, 4vw, 30px);
-      letter-spacing:-.02em;
-    }
-    .winnerSub{ margin:6px 0 0; color: var(--muted); }
-    .winnerHero{
-      margin-top:14px;
-      display:flex;
-      gap:14px;
-      align-items:center;
-      padding:14px;
-      border-radius: 20px;
-      background: rgba(0,0,0,.16);
-      border:1px solid rgba(255,255,255,.14);
-    }
-    .winnerEmoji{
-      width:64px; height:64px;
-      display:grid; place-items:center;
-      border-radius: 22px;
-      background: rgba(255,255,255,.09);
-      border:1px solid rgba(255,255,255,.14);
-      font-size: 2rem;
-      overflow:hidden;
-    }
-    .winnerEmoji img{
-      width:100%; height:100%;
-      object-fit:cover;
-      border-radius:22px;
-      display:block;
-    }
-    .winnerName{
-      font-size: 1.2rem;
-      font-weight: 900;
-    }
-    .winnerStats{
-      margin-top:2px;
-      color: var(--muted);
-      font-variant-numeric: tabular-nums;
-    }
-    .modalActions{
-      margin-top:14px;
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    /* Confetti */
-    #confetti{
-      position:fixed; inset:0;
-      pointer-events:none;
-      overflow:hidden;
-      z-index: 55;
-    }
-    .confetti{
-      position:absolute;
-      width:10px; height:16px;
-      border-radius: 4px;
-      opacity:.9;
-      transform: translateY(-20px) rotate(0deg);
-      animation: fall linear forwards;
-    }
-    @keyframes fall{
-      to{ transform: translateY(calc(100vh + 40px)) rotate(720deg); }
-    }
-  </style>
+/* ===== Footer ===== */
+footer{
+  margin-top:12px;
+  font-size:13px;
+  color:var(--muted);
+}
+</style>
 </head>
 
 <body>
-  <div class="noise"></div>
-  <div id="confetti"></div>
-  <div id="floatingLayer" class="floating-layer" aria-hidden="true"></div>
-
-  <div class="wrap">
-    <header>
-      <div class="brand">
-        <h1 class="title">Racing Game <span class="badge">BMC Lucky Draw✨</span></h1>
-        <p class="subtitle">a product of BMC-Marketing Transformation team</p>
-      </div>
-      <div class="tipPill">Tip: <b>Space</b> Start/Pause · <b>B</b> Boost ngẫu nhiên</div>
-    </header>
-
-    <section class="top">
-      <!-- LEFT: controls -->
-      <div class="controls panel">
-        <div class="grid2">
-          <div>
-            <label for="raceLength">Race length</label>
-            <div class="input">
-              <span style="opacity:.7">🏁</span>
-              <input id="raceLength" type="range" min="700" max="1600" value="1100" />
-              <span id="raceLengthLabel" style="opacity:.75;min-width:66px;text-align:right">1100px</span>
-            </div>
-          </div>
-
-          <div>
-            <label for="theme">Theme</label>
-            <div class="input">
-              <span style="opacity:.7">🎨</span>
-              <select id="theme">
-                <option value="mood">Mood Emojis</option>
-                <option value="fb" selected>F&B Emojis</option>
-                <option value="momo">MoMo Illustration</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="btns">
-          <button class="primary" id="startBtn">Start</button>
-          <button class="ghost" id="pauseBtn" disabled>Pause</button>
-          <button class="ghost" id="resetBtn">Reset (New round)</button>
-          <button class="danger" id="clearBtn">Clear</button>
-        </div>
-
-        <div class="tipLine">
-          <div class="dot"></div>
-          <div id="themeHint">F&B Emojis: cuộc đua “bánh trái” kiểu đồng gay cấn 🍔🍰🍩</div>
-        </div>
-      </div>
-
-      <!-- RIGHT: roster -->
-      <div class="roster panel">
-        <div class="rosterTop">
-          <h3 class="rosterTitle">Racers <span class="pill" id="countPill">0</span></h3>
-          <div class="btns" style="margin-top:0;">
-            <button class="tiny ghost" id="uploadAllBtn">Upload all list</button>
-            <input id="uploadAllInput" type="file" accept="image/*" multiple style="display:none" />
-            <button class="tiny" id="addBtn">+ Add</button>
-          </div>
-        </div>
-
-        <div class="list" id="racerList"></div>
-
-        <div class="toast">
-          <div>Tip:Upload all list: Upload hàng loạt hình ảnh & tên người chơi từ máy của bạn.</div>
-          <div class="kbd">B</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Track full width -->
-    <section class="track panel">
-      <div class="trackTop">
-        <div class="meta">
-          Status: <b id="status">idle</b>
-          <span>·</span>
-          Winner: <b id="winner">—</b>
-          <span>·</span>
-          <span>Time: <b id="time">0.00s</b></span>
-        </div>
-
-        <div class="progressWrap">
-          <div class="bar"><i id="raceBar"></i></div>
-          <div class="pct" id="racePct">0%</div>
-        </div>
-      </div>
-
-      <div class="lanes" id="lanes">
-        <div class="finish"></div>
-        <div class="finishLabel">FINISH</div>
-      </div>
-    </section>
+<div class="wrap">
+<header>
+  <div>
+    <h1>Racing Game 👤</h1>
+    <div class="subtitle">a product of BMC – Marketing Transformation team</div>
   </div>
+  <div class="tip">Space: Start/Pause · B: Boost</div>
+</header>
 
-  <!-- Winner modal -->
-  <div class="modal" id="modal">
-    <div class="modalCard">
-      <div class="modalInner">
-        <div class="modalTop">
-          <div>
-            <h2 class="winnerTitle">Winner winner 🏆</h2>
-            <p class="winnerSub">Chạm vạch đích trước! Screenshot khoe team liền 👀</p>
-          </div>
-          <button class="ghost" id="closeModal">Close</button>
-        </div>
-
-        <div class="winnerHero">
-          <div class="winnerEmoji" id="winnerEmoji">🏁</div>
-          <div style="flex:1">
-            <div class="winnerName" id="winnerName">—</div>
-            <div class="winnerStats" id="winnerStats">—</div>
-          </div>
-        </div>
-
-        <div class="modalActions">
-          <button class="primary" id="replayBtn">Replay</button>
-          <button class="ghost" id="resetFromModal">Reset (New round)</button>
-        </div>
+<!-- TOP -->
+<section class="top">
+  <!-- SETTINGS -->
+  <div class="controls panel">
+    <div class="row">
+      <label>Race length</label>
+      <div class="input">
+        🏁
+        <input id="raceLength" type="range" min="700" max="1600" value="1100"/>
+        <span id="raceLengthLabel">1100px</span>
       </div>
+    </div>
+
+    <div class="row">
+      <label>Theme</label>
+      <div class="input">
+        🎨
+        <select id="theme">
+          <option value="fb" selected>F&B Emojis</option>
+          <option value="mood">Mood Emojis</option>
+          <option value="momo">MoMo Illustration</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="btns">
+      <button class="primary" id="startBtn">Start</button>
+      <button class="ghost" id="pauseBtn" disabled>Pause</button>
+      <button class="ghost" id="resetBtn">Reset</button>
+      <button class="danger" id="clearBtn">Clear</button>
     </div>
   </div>
 
-  <script>
-    const $ = (s) => document.querySelector(s);
-
-    const racerListEl = $("#racerList");
-    const lanesEl = $("#lanes");
-    const floatingLayer = $("#floatingLayer");
-
-    const startBtn = $("#startBtn");
-    const pauseBtn = $("#pauseBtn");
-    const resetBtn = $("#resetBtn");
-    const clearBtn = $("#clearBtn");
-    const addBtn = $("#addBtn");
-
-    const uploadAllBtn = $("#uploadAllBtn");
-    const uploadAllInput = $("#uploadAllInput");
-
-    const raceLengthEl = $("#raceLength");
-    const raceLengthLabel = $("#raceLengthLabel");
-    const themeEl = $("#theme");
-    const themeHint = $("#themeHint");
-
-    const statusEl = $("#status");
-    const winnerEl = $("#winner");
-    const timeEl = $("#time");
-    const raceBarEl = $("#raceBar");
-    const racePctEl = $("#racePct");
-    const countPill = $("#countPill");
-
-    const modal = $("#modal");
-    const closeModal = $("#closeModal");
-    const replayBtn = $("#replayBtn");
-    const resetFromModal = $("#resetFromModal");
-    const winnerEmojiEl = $("#winnerEmoji");
-    const winnerNameEl = $("#winnerName");
-    const winnerStatsEl = $("#winnerStats");
-
-    const confettiWrap = $("#confetti");
-
-    const EMOJIS = ["🏎️","🚗","🚀","🛵","🛹","🐉","🦄","🐙","🦖","🐱","🐶","🍓","🍕","🧋","⚡","🌙","🪩","🔥"];
-
-    // Theme colors + background presets
-    const THEMES = {
-      mood: { bg0:"#06060A", bg1:"#0A0A12", accent:"#FFD34D", accent2:"#FF7AE6", light:false },
-      fb:   { bg0:"#FFE5F1", bg1:"#F3E9FF", accent:"#FF6FB1", accent2:"#8B5CFF", light:true },
-      momo: { bg0:"#0B0B12", bg1:"#17172A", accent:"#F95396", accent2:"#98CDF4", light:false },
-    };
-
-    // Theme 3 assets (folder /assets)
-    const MOMO_ASSET_NAMES = [
-      "Mkt solution_Chu cua hang_01.png",
-      "Mkt solution_Chu cua hang_02.png",
-      "Mkt solution_Chu cua hang_03.png",
-      "Mkt solution_Chu cua hang_04.png",
-      "Mkt solution_Chu cua hang_05.png",
-      "Mkt solution_Chu cua hang_06.png",
-      "Mkt solution_Chu cua hang_07.png",
-      "Mkt solution_Chu cua hang_08.png",
-      "Mkt solution_Chu cua hang_09.png",
-
-      "Mkt solution_Cua hang cf mua sam_03.png",
-      "Mkt solution_Cua hang cf mua sam_04.png",
-      "Mkt solution_Cua hang cf mua sam_05.png",
-      "Mkt solution_Cua hang cf mua sam_06.png",
-
-      "Mkt solution_FnB lam dep_01.png",
-      "Mkt solution_FnB lam dep_03.png",
-      "Mkt solution_FnB lam dep_05.png",
-      "Mkt solution_FnB lam dep_06.png",
-      "Mkt solution_FnB làm đẹp_02.png",
-
-      "Mkt solution_Giam gia qua voucher_03.png",
-      "Mkt solution_Giam gia qua voucher_04.png",
-      "Mkt solution_Giam gia qua voucher_05.png",
-      "Mkt solution_giam gia qua voucher_01.png",
-      "Mkt solution_giam gia qua voucher_02.png",
-
-      "Mkt solution_Mua sam an uong_01.png",
-      "Mkt solution_Mua sam an uong_02.png",
-      "Mkt solution_Mua sam an uong_03.png",
-      "Mkt solution_Mua sam an uong_04.png",
-      "Mkt solution_Mua sam an uong_05.png",
-
-      "TTT_Cf tra sua_01.png",
-      "TTT_Cf tra sua_02.png",
-      "TTT_Cf tra sua_03.png",
-
-      "TTT_Tui +_01.png",
-      "TTT_Tui +_02.png",
-      "TTT_Tui +_03.png",
-
-      "TTT_chart tang truong_03.png",
-
-      "TTT_dong xu_01.png",
-      "TTT_dong xu_02.png",
-      "TTT_dong xu_03.png",
-
-      "TTT_fast food_01.png",
-      "TTT_fast food_02.png",
-      "TTT_fast food_03.png",
-      "TTT_fast food_04.png",
-
-      "TTT_shopping bag_01.png",
-      "TTT_shopping bag_02.png",
-      "TTT_shopping bag_03.png",
-    ];
-    const momoPackImages = MOMO_ASSET_NAMES.map(name => `/assets/${encodeURIComponent(name)}`);
-
-    // ===== State =====
-    let racerInputs = [];
-    let racers = [];
-    let running = false;
-    let finished = false;
-    let startTime = 0;
-    let elapsed = 0;
-    let rafId = null;
-    let lastTs = 0;
-
-    function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
-    function rand(a=0, b=1){ return a + Math.random()*(b-a); }
-    function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-
-    function applyTheme(name){
-      const t = THEMES[name] || THEMES.fb;
-
-      // background vars
-      document.documentElement.style.setProperty("--bg0", t.bg0);
-      document.documentElement.style.setProperty("--bg1", t.bg1);
-      document.documentElement.style.setProperty("--accent", t.accent);
-      document.documentElement.style.setProperty("--accent2", t.accent2);
-
-      // text colors: theme 2 (fb) is light bg -> dark text
-      if (t.light){
-        document.documentElement.style.setProperty("--txt", "rgba(20,20,30,.92)");
-        document.documentElement.style.setProperty("--muted", "rgba(20,20,30,.62)");
-        document.documentElement.style.setProperty("--stroke", "rgba(0,0,0,.12)");
-      } else {
-        document.documentElement.style.setProperty("--txt", "rgba(255,255,255,.92)");
-        document.documentElement.style.setProperty("--muted", "rgba(255,255,255,.65)");
-        document.documentElement.style.setProperty("--stroke", "rgba(255,255,255,.14)");
-      }
-
-      // theme-specific background
-      if (name === "fb"){
-        document.body.style.background =
-          `radial-gradient(900px 600px at 25% 20%, rgba(255,111,177,.28), transparent 60%),
-           radial-gradient(900px 700px at 80% 18%, rgba(139,92,255,.20), transparent 60%),
-           radial-gradient(700px 500px at 45% 95%, rgba(255,211,77,.14), transparent 60%),
-           linear-gradient(180deg, var(--bg0), var(--bg1))`;
-      } else if (name === "momo"){
-        document.body.style.background =
-          `radial-gradient(1000px 650px at 20% 15%, rgba(249,83,150,.18), transparent 60%),
-           radial-gradient(1000px 700px at 85% 25%, rgba(152,205,244,.16), transparent 55%),
-           radial-gradient(800px 520px at 55% 95%, rgba(119,89,210,.10), transparent 60%),
-           linear-gradient(180deg, var(--bg0), var(--bg1))`;
-      } else {
-        document.body.style.background =
-          `radial-gradient(1000px 600px at 20% 15%, rgba(255,211,77,.10), transparent 60%),
-           radial-gradient(1000px 700px at 85% 25%, rgba(255,122,230,.12), transparent 55%),
-           radial-gradient(700px 500px at 55% 95%, rgba(0,229,255,.08), transparent 60%),
-           linear-gradient(180deg, var(--bg0), var(--bg1))`;
-      }
-    }
-
-    function setStatus(txt){ statusEl.textContent = txt; }
-    function formatTime(s){ return s.toFixed(2) + "s"; }
-
-    function updateSliders(){
-      raceLengthLabel.textContent = `${raceLengthEl.value}px`;
-    }
-
-    function stopLoop(){
-      cancelAnimationFrame(rafId);
-      rafId = null;
-    }
-
-    function setIcon(containerEl, iconValue){
-      containerEl.innerHTML = "";
-      if (typeof iconValue === "string" && iconValue.startsWith("data:image")) {
-        const img = document.createElement("img");
-        img.src = iconValue;
-        containerEl.appendChild(img);
-      } else {
-        containerEl.textContent = iconValue || "🙂";
-      }
-    }
-
-    // ===== Floating builder =====
-    function clearFloating(){
-      floatingLayer.innerHTML = "";
-    }
-
-    function buildFloatingTheme(themeName){
-      clearFloating();
-
-      const W = window.innerWidth;
-      const H = window.innerHeight;
-
-      const addStars = (n) => {
-        for (let i=0;i<n;i++){
-          const s = document.createElement("div");
-          s.className = "float-star";
-          s.style.left = Math.floor(Math.random()*(W-10)) + "px";
-          s.style.top  = Math.floor(Math.random()*(H-10)) + "px";
-          s.style.animationDelay = (Math.random()*1.8).toFixed(2) + "s";
-          floatingLayer.appendChild(s);
-        }
-      };
-
-      const addEmojiSet = (emojiSet, count) => {
-        for (let i=0;i<count;i++){
-          const e = document.createElement("div");
-          e.className = "float-emoji";
-
-          const g = document.createElement("div");
-          g.className = "g";
-          g.textContent = emojiSet[Math.floor(Math.random()*emojiSet.length)];
-
-          e.style.setProperty("--s", (44 + Math.random()*64).toFixed(0) + "px");
-          e.style.setProperty("--x", Math.floor(Math.random()*(W-60)) + "px");
-          e.style.setProperty("--y", Math.floor(Math.random()*(H-60)) + "px");
-          e.style.setProperty("--r", Math.floor(Math.random()*360) + "deg");
-          e.style.setProperty("--t", (4.8 + Math.random()*3.6).toFixed(2) + "s");
-          e.style.setProperty("--t2", (5.6 + Math.random()*4.2).toFixed(2) + "s");
-          e.style.setProperty("--op", (0.55 + Math.random()*0.40).toFixed(2));
-
-          e.appendChild(g);
-          floatingLayer.appendChild(e);
-        }
-      };
-
-      const addImageSet = (imgSet, count) => {
-        if (!imgSet || !imgSet.length) return;
-        for (let i=0;i<count;i++){
-          const wrap = document.createElement("div");
-          wrap.className = "float-img";
-
-          const img = document.createElement("img");
-          img.src = imgSet[Math.floor(Math.random()*imgSet.length)];
-          img.onerror = () => wrap.remove(); // tránh ô vuông lỗi
-
-          const w = Math.floor(72 + Math.random()*88);
-          wrap.style.setProperty("--w", w + "px");
-          wrap.style.setProperty("--h", w + "px");
-          wrap.style.setProperty("--x", Math.floor(Math.random()*(W-w)) + "px");
-          wrap.style.setProperty("--y", Math.floor(Math.random()*(H-w)) + "px");
-          wrap.style.setProperty("--t", (5.2 + Math.random()*4.2).toFixed(2) + "s");
-          wrap.style.setProperty("--op", (0.55 + Math.random()*0.35).toFixed(2));
-
-          wrap.appendChild(img);
-          floatingLayer.appendChild(wrap);
-        }
-      };
-
-      if (themeName === "mood"){
-        const set = ["😵‍💫","🤯","😡","🥶","😱","😈","🤡","😎","🤖","👀","😬","🤩","🥳","😤","😴","🫣","🥲","😇","😏"];
-        addEmojiSet(set, 12);
-        addStars(14);
-        themeHint.innerHTML = `Mood Emojis: tượng trưng cho 1 BMC đa sầu đa cảm đa sắc thái ✨`;
-        return;
-      }
-
-      if (themeName === "fb"){
-        const set = ["🍔","🍕","🍩","🍰","🧁","🍎","🍓","🍦","🍭","🍟","🥤","🍫","🥥","🍧","🍡","🍇","😋","🤤","😍","😛"];
-        addEmojiSet(set, 14);
-        addStars(10);
-        themeHint.innerHTML = `F&B Emojis: cuộc đua “bánh trái” kiểu đồng gay cấn 🍔🍰🍩`;
-        return;
-      }
-
-      if (themeName === "momo"){
-        addImageSet(momoPackImages, 12);
-        addStars(10);
-        themeHint.innerHTML = `MoMo Illustration: đang dùng <b>${momoPackImages.length}</b> ảnh trong <b>/assets</b> để floating 💗`;
-        return;
-      }
-    }
-
-    // ===== Racer list =====
-    function makeRacerRow({name="", emoji=pick(EMOJIS), avatar=null} = {}){
-      const wrap = document.createElement("div");
-      wrap.className = "racerInput";
-
-      const avatarBox = document.createElement("div");
-      avatarBox.className = "avatarBox";
-      avatarBox.title = "Click để upload ảnh · Double-click để đổi emoji (fallback)";
-
-      const hint = document.createElement("span");
-      hint.className = "avatarHint";
-      hint.textContent = "upload";
-
-      const fileInput = document.createElement("input");
-      fileInput.type = "file";
-      fileInput.accept = "image/*";
-      fileInput.style.display = "none";
-
-      const emojiFallback = document.createElement("span");
-      emojiFallback.className = "emojiFallback";
-      emojiFallback.textContent = emoji;
-
-      const avatarImg = document.createElement("img");
-
-      if (avatar && avatar.startsWith("data:image")){
-        avatarImg.src = avatar;
-        avatarBox.appendChild(avatarImg);
-      } else {
-        avatarBox.appendChild(emojiFallback);
-      }
-      avatarBox.appendChild(hint);
-      avatarBox.appendChild(fileInput);
-
-      const input = document.createElement("input");
-      input.placeholder = "Nhập tên (vd: Minh, Linh, Huy...)";
-      input.value = name;
-
-      const xWrap = document.createElement("div");
-      xWrap.className = "x";
-      const del = document.createElement("button");
-      del.type = "button";
-      del.className = "danger tiny";
-      del.textContent = "✕";
-      xWrap.appendChild(del);
-
-      wrap.appendChild(avatarBox);
-      wrap.appendChild(input);
-      wrap.appendChild(xWrap);
-
-      const rowObj = {
-        wrap,
-        input,
-        emojiFallback,
-        fileInput,
-        avatarDataURL: (avatar && avatar.startsWith("data:image")) ? avatar : null
-      };
-      racerInputs.push(rowObj);
-      racerListEl.appendChild(wrap);
-
-      avatarBox.addEventListener("click", () => fileInput.click());
-
-      fileInput.addEventListener("change", () => {
-        const file = fileInput.files && fileInput.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = () => {
-          rowObj.avatarDataURL = reader.result;
-          avatarBox.innerHTML = "";
-          const img = document.createElement("img");
-          img.src = rowObj.avatarDataURL;
-          avatarBox.appendChild(img);
-          avatarBox.appendChild(hint);
-          avatarBox.appendChild(fileInput);
-          syncFromInputs();
-          rebuildTrack();
-        };
-        reader.readAsDataURL(file);
-      });
-
-      avatarBox.addEventListener("dblclick", (e) => {
-        e.preventDefault();
-        rowObj.avatarDataURL = null;
-        rowObj.emojiFallback.textContent = pick(EMOJIS);
-        avatarBox.innerHTML = "";
-        avatarBox.appendChild(rowObj.emojiFallback);
-        avatarBox.appendChild(hint);
-        avatarBox.appendChild(fileInput);
-        syncFromInputs();
-        rebuildTrack();
-      });
-
-      input.addEventListener("input", () => syncFromInputs());
-
-      del.addEventListener("click", () => {
-        wrap.remove();
-        racerInputs = racerInputs.filter(r => r.wrap !== wrap);
-        syncFromInputs();
-        rebuildTrack();
-      });
-
-      syncFromInputs();
-      return rowObj;
-    }
-
-    function clearRacerUI(){
-      racerInputs.forEach(r => r.wrap.remove());
-      racerInputs = [];
-      racerListEl.innerHTML = "";
-    }
-
-    function syncFromInputs(){
-      const active = racerInputs
-        .map(r => ({
-          name: (r.input.value || "").trim(),
-          avatar: r.avatarDataURL,
-          emoji: r.emojiFallback?.textContent?.trim() || "🙂"
-        }))
-        .filter(r => r.name.length > 0);
-
-      countPill.textContent = active.length;
-      return active;
-    }
-
-    function buildRacers(){
-      const inputData = syncFromInputs();
-      racers = inputData.map((r, idx) => ({
-        id: idx,
-        name: r.name,
-        icon: (r.avatar && r.avatar.startsWith("data:image")) ? r.avatar : r.emoji,
-        x: 0,
-        v: rand(140, 220),
-        targetV: 0,
-        boost: 0,
-        stumble: 0,
-        nextMoodAt: performance.now() + rand(250, 650),
-        bestBoost: 0,
-        finishedAt: null,
-        el: null,
-        statEl: null
-      }));
-      racers.forEach(r => r.targetV = r.v);
-    }
-
-    function rebuildTrack(){
-      lanesEl.querySelectorAll(".lane").forEach(n => n.remove());
-      buildRacers();
-
-      racers.forEach((r) => {
-        const lane = document.createElement("div");
-        lane.className = "lane";
-
-        const kart = document.createElement("div");
-        kart.className = "kart";
-        kart.style.left = "12px";
-
-        const bubble = document.createElement("div");
-        bubble.className = "bubble";
-        setIcon(bubble, r.icon);
-
-        const tag = document.createElement("div");
-        tag.className = "tag";
-
-        const name = document.createElement("div");
-        name.className = "name";
-        name.textContent = r.name;
-
-        const stat = document.createElement("div");
-        stat.className = "stat";
-        stat.textContent = "0%";
-
-        tag.appendChild(name);
-        tag.appendChild(stat);
-        kart.appendChild(bubble);
-        kart.appendChild(tag);
-
-        lane.appendChild(kart);
-        lanesEl.appendChild(lane);
-
-        r.el = kart;
-        r.statEl = stat;
-      });
-
-      winnerEl.textContent = "—";
-      timeEl.textContent = formatTime(0);
-      raceBarEl.style.width = "0%";
-      racePctEl.textContent = "0%";
-
-      setStatus("idle");
-      finished = false;
-      running = false;
-      pauseBtn.disabled = true;
-      pauseBtn.textContent = "Pause";
-      startBtn.textContent = "Start";
-      startBtn.disabled = false;
-
-      stopLoop();
-      elapsed = 0;
-      lastTs = 0;
-    }
-
-    function showModal(){ modal.classList.add("show"); }
-    function hideModal(){ modal.classList.remove("show"); }
-
-    function popConfetti(count=120){
-      confettiWrap.innerHTML = "";
-      const colors = [
-        "rgba(124,77,255,.95)",
-        "rgba(0,229,255,.95)",
-        "rgba(61,255,139,.92)",
-        "rgba(255,204,0,.95)",
-        "rgba(255,77,109,.92)",
-        "rgba(255,255,255,.90)"
-      ];
-      for (let i=0;i<count;i++){
-        const c = document.createElement("div");
-        c.className = "confetti";
-        c.style.left = `${Math.random()*100}vw`;
-        c.style.top = `${-20 - Math.random()*60}px`;
-        c.style.background = colors[Math.floor(Math.random()*colors.length)];
-        c.style.width = `${6 + Math.random()*10}px`;
-        c.style.height = `${10 + Math.random()*16}px`;
-        c.style.opacity = `${0.65 + Math.random()*0.35}`;
-        const dur = 1.2 + Math.random()*1.6;
-        c.style.animationDuration = `${dur}s`;
-        c.style.animationDelay = `${Math.random()*0.25}s`;
-        confettiWrap.appendChild(c);
-      }
-      setTimeout(() => (confettiWrap.innerHTML = ""), 2600);
-    }
-
-    function finish(winner){
-      finished = true;
-      running = false;
-      stopLoop();
-
-      setStatus("finished");
-      startBtn.disabled = false;
-      startBtn.textContent = "Replay";
-      pauseBtn.disabled = true;
-
-      winnerEl.textContent = winner.name;
-      winner.el?.classList.add("win");
-
-      setIcon(winnerEmojiEl, winner.icon);
-      winnerNameEl.textContent = winner.name;
-      winnerStatsEl.textContent = `Finish time: ${formatTime(elapsed)} · Best boost: +${Math.round(winner.bestBoost)}`;
-
-      showModal();
-      popConfetti(160);
-    }
-
-    // ===== Smooth Random Engine =====
-    function runLoop(){
-      const trackLen = Number(raceLengthEl.value);
-
-      const lanesRect = lanesEl.getBoundingClientRect();
-      const finishX = lanesRect.width - 62 - 12;
-      const maxPx = Math.max(40, finishX - 190);
-
-      const MIN_V = 120;
-      const MAX_V = 340;
-      const CHANGE_EVERY_MIN = 280;
-      const CHANGE_EVERY_MAX = 950;
-      const SMOOTHING = 0.10;
-
-      const BOOST_CHANCE = 0.12;
-      const STUMBLE_CHANCE = 0.09;
-      const BOOST_MIN = 60,  BOOST_MAX = 160;
-      const STUMBLE_MIN = 45, STUMBLE_MAX = 140;
-
-      startTime = performance.now() - (elapsed * 1000);
-      if (!lastTs) lastTs = performance.now();
-
-      stopLoop();
-      rafId = requestAnimationFrame(frame);
-
-      function frame(ts){
-        if (!running || finished){
-          rafId = requestAnimationFrame(frame);
-          return;
-        }
-
-        const dt = clamp((ts - lastTs) / 1000, 0, 0.05);
-        lastTs = ts;
-
-        elapsed = (performance.now() - startTime) / 1000;
-        timeEl.textContent = formatTime(elapsed);
-
-        let leader = racers[0] || null;
-
-        for (const r of racers){
-          if (!leader || r.x > leader.x) leader = r;
-
-          if (ts >= r.nextMoodAt){
-            const mid = (MIN_V + MAX_V) / 2;
-            const spread = (MAX_V - MIN_V) / 2;
-            const bias = (Math.random() - 0.5) * 0.9;
-            r.targetV = clamp(mid + bias * spread * 2, MIN_V, MAX_V);
-            r.nextMoodAt = ts + rand(CHANGE_EVERY_MIN, CHANGE_EVERY_MAX);
-          }
-
-          if (Math.random() < BOOST_CHANCE * dt){
-            const b = rand(BOOST_MIN, BOOST_MAX);
-            r.boost = Math.max(r.boost, b);
-            r.bestBoost = Math.max(r.bestBoost, b);
-            r.el?.classList.add("boost");
-            setTimeout(() => r.el?.classList.remove("boost"), 160);
-          }
-          if (Math.random() < STUMBLE_CHANCE * dt){
-            r.stumble = Math.max(r.stumble, rand(STUMBLE_MIN, STUMBLE_MAX));
-          }
-
-          r.boost *= (1 - dt * 2.6);
-          r.stumble *= (1 - dt * 3.2);
-          if (r.boost < 1) r.boost = 0;
-          if (r.stumble < 1) r.stumble = 0;
-
-          r.v = r.v + (r.targetV - r.v) * SMOOTHING;
-          const effV = Math.max(30, r.v + r.boost - r.stumble);
-
-          r.x += effV * dt;
-
-          const pct = clamp((r.x / trackLen) * 100, 0, 100);
-          if (r.statEl) r.statEl.textContent = `${pct.toFixed(0)}%`;
-
-          const px = clamp((r.x / trackLen) * maxPx, 0, maxPx);
-          if (r.el) r.el.style.transform = `translateX(${px}px)`;
-
-          if (r.x >= trackLen && !r.finishedAt){
-            r.finishedAt = elapsed;
-            finish(r);
-            return;
-          }
-        }
-
-        const leaderPct = leader ? clamp((leader.x / trackLen) * 100, 0, 100) : 0;
-        raceBarEl.style.width = `${leaderPct}%`;
-        racePctEl.textContent = `${leaderPct.toFixed(0)}%`;
-
-        rafId = requestAnimationFrame(frame);
-      }
-    }
-
-    function startRace(){
-      if (syncFromInputs().length === 0){
-        setStatus("Nhập ít nhất 1 tên nha 😅");
-        setTimeout(() => setStatus("idle"), 900);
-        return;
-      }
-
-      hideModal();
-      rebuildTrack();
-
-      running = true;
-      finished = false;
-      setStatus("racing");
-      startBtn.disabled = true;
-      pauseBtn.disabled = false;
-      pauseBtn.textContent = "Pause";
-      startBtn.textContent = "Start";
-
-      runLoop();
-    }
-
-    function pause(){
-      if (!running) return;
-      running = false;
-      setStatus("paused");
-      pauseBtn.textContent = "Resume";
-      startBtn.disabled = false;
-    }
-
-    function resume(){
-      if (running || finished) return;
-      running = true;
-      setStatus("racing");
-      pauseBtn.textContent = "Pause";
-      startBtn.disabled = true;
-      if (!rafId) runLoop();
-    }
-
-    function manualBoost(){
-      if (!running || finished) return;
-      if (!racers.length) return;
-      const r = racers[Math.floor(Math.random()*racers.length)];
-      const b = rand(90, 200);
-      r.boost = Math.max(r.boost, b);
-      r.bestBoost = Math.max(r.bestBoost, b);
-      r.el?.classList.add("boost");
-      setTimeout(() => r.el?.classList.remove("boost"), 180);
-      setStatus(`Boost cho ${r.name} ⚡`);
-      setTimeout(() => setStatus("racing"), 600);
-    }
-
-    function newRoundReset(){
-      hideModal();
-      confettiWrap.innerHTML = "";
-      elapsed = 0;
-      lastTs = 0;
-      winnerEl.textContent = "—";
-      timeEl.textContent = formatTime(0);
-      raceBarEl.style.width = "0%";
-      racePctEl.textContent = "0%";
-      rebuildTrack();
-    }
-
-    // Upload all list
-    function filenameToName(filename){
-      return filename.replace(/\.[^/.]+$/, "").replace(/[_-]+/g, " ").trim();
-    }
-    function readFileAsDataURL(file){
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-    async function handleUploadAll(files){
-      if (!files || !files.length) return;
-
-      stopLoop();
-      running = false;
-      finished = false;
-      setStatus("idle");
-
-      clearRacerUI();
-
-      for (const file of files){
-        const dataURL = await readFileAsDataURL(file);
-        makeRacerRow({
-          name: filenameToName(file.name),
-          emoji: pick(EMOJIS),
-          avatar: dataURL
-        });
-      }
-
-      rebuildTrack();
-    }
-
-    // ===== Events =====
-    raceLengthEl.addEventListener("input", updateSliders);
-
-    themeEl.addEventListener("change", () => {
-      applyTheme(themeEl.value);
-      buildFloatingTheme(themeEl.value);
-      rebuildTrack();
-    });
-
-    window.addEventListener("resize", () => buildFloatingTheme(themeEl.value));
-
-    startBtn.addEventListener("click", () => {
-      if (finished){
-        newRoundReset();
-        startRace();
-        return;
-      }
-      startRace();
-    });
-
-    pauseBtn.addEventListener("click", () => {
-      if (!running && !finished) resume();
-      else pause();
-    });
-
-    resetBtn.addEventListener("click", () => newRoundReset());
-
-    clearBtn.addEventListener("click", () => {
-      clearRacerUI();
-      rebuildTrack();
-    });
-
-    addBtn.addEventListener("click", () => {
-      makeRacerRow({ name:"", emoji: pick(EMOJIS), avatar: null });
-      rebuildTrack();
-    });
-
-    closeModal.addEventListener("click", hideModal);
-    modal.addEventListener("click", (e) => { if (e.target === modal) hideModal(); });
-
-    replayBtn.addEventListener("click", () => {
-      hideModal();
-      startRace();
-    });
-
-    resetFromModal.addEventListener("click", () => newRoundReset());
-
-    window.addEventListener("keydown", (e) => {
-      if (e.code === "Space"){
-        e.preventDefault();
-        if (finished){
-          newRoundReset();
-          startRace();
-          return;
-        }
-        if (!running){
-          if (syncFromInputs().length === 0) return;
-          if (statusEl.textContent === "idle") startRace();
-          else resume();
-        } else {
-          pause();
-        }
-      }
-      if (e.key.toLowerCase() === "b") manualBoost();
-    });
-
-    uploadAllBtn.addEventListener("click", () => uploadAllInput.click());
-    uploadAllInput.addEventListener("change", async () => {
-      const files = Array.from(uploadAllInput.files || []);
-      await handleUploadAll(files);
-      uploadAllInput.value = "";
-    });
-
-    // ===== Init (Theme 2 default) =====
-    (function init(){
-      updateSliders();
-      // default theme = F&B
-      themeEl.value = "fb";
-      applyTheme("fb");
-      buildFloatingTheme("fb");
-
-      // default: 1 empty row
-      makeRacerRow({ name:"", emoji:"🎯", avatar: null });
-      rebuildTrack();
-    })();
-  </script>
+  <!-- RACERS -->
+  <div class="roster panel">
+    <div class="rosterTop">
+      <b>Racers (<span id="count">0</span>)</b>
+      <div class="btns" style="margin:0">
+        <button class="ghost" id="uploadAll">Upload all list</button>
+        <input id="uploadAllInput" type="file" multiple accept="image/*" hidden>
+        <button id="addBtn">+ Add</button>
+      </div>
+    </div>
+
+    <div class="list" id="racerList"></div>
+
+    <footer>
+      Upload nhiều ảnh 1 lần → tự tạo người chơi (tên = tên file)
+    </footer>
+  </div>
+</section>
+
+<!-- TRACK -->
+<section class="track panel">
+  <div class="trackTop">
+    <div>Status: <b id="status">idle</b> · Winner: <b id="winner">—</b></div>
+    <div class="progress">
+      <div class="bar"><i id="bar"></i></div>
+      <span id="pct">0%</span>
+    </div>
+  </div>
+
+  <div class="lanes" id="lanes"></div>
+</section>
+</div>
+
+<script>
+/* ========= STATE ========= */
+let racers=[],running=false,finished=false,raf=null;
+const list=document.getElementById("racerList");
+const lanes=document.getElementById("lanes");
+const statusEl=document.getElementById("status");
+const winnerEl=document.getElementById("winner");
+const bar=document.getElementById("bar");
+const pct=document.getElementById("pct");
+const count=document.getElementById("count");
+
+/* ========= RACERS ========= */
+function addRacer(name="",img=null){
+  const el=document.createElement("div");
+  el.className="racer";
+  el.innerHTML=`
+    <div class="avatar">${img?`<img src="${img}">`:"🙂"}</div>
+    <input placeholder="Nhập tên" value="${name}">
+    <div class="x">✕</div>
+  `;
+  list.appendChild(el);
+
+  el.querySelector(".x").onclick=()=>{el.remove();sync()};
+  sync();
+}
+function sync(){
+  racers=[...list.children].map((r,i)=>({
+    name:r.querySelector("input").value||`Racer ${i+1}`,
+    x:0,
+    v:Math.random()*120+140,
+    el:null
+  }));
+  count.textContent=racers.length;
+  buildTrack();
+}
+
+/* ========= TRACK ========= */
+function buildTrack(){
+  lanes.innerHTML="";
+  racers.forEach(r=>{
+    const lane=document.createElement("div");
+    lane.className="lane";
+    const kart=document.createElement("div");
+    kart.className="kart";
+    kart.innerHTML=`
+      <div class="bubble">🏎️</div>
+      <div class="tag">${r.name}</div>
+    `;
+    lane.appendChild(kart);
+    lanes.appendChild(lane);
+    r.el=kart;
+  });
+}
+
+/* ========= LOOP ========= */
+function loop(){
+  if(!running) return;
+  let lead=0;
+  racers.forEach(r=>{
+    r.v+= (Math.random()-0.5)*30;
+    r.x+=r.v*0.016;
+    r.x=Math.max(0,r.x);
+    r.el.style.transform=`translate(${r.x}px,-50%)`;
+    lead=Math.max(lead,r.x);
+  });
+  const p=Math.min(100,lead/1000*100);
+  bar.style.width=p+"%";
+  pct.textContent=Math.floor(p)+"%";
+  raf=requestAnimationFrame(loop);
+}
+
+/* ========= CONTROLS ========= */
+document.getElementById("startBtn").onclick=()=>{
+  if(running) return;
+  running=true;
+  finished=false;
+  statusEl.textContent="racing";
+  loop();
+};
+document.getElementById("pauseBtn").onclick=()=>{
+  running=!running;
+  statusEl.textContent=running?"racing":"paused";
+  if(running) loop();
+};
+document.getElementById("resetBtn").onclick=()=>{
+  running=false;
+  statusEl.textContent="idle";
+  racers.forEach(r=>r.x=0);
+  buildTrack();
+  bar.style.width="0%";
+  pct.textContent="0%";
+};
+document.getElementById("clearBtn").onclick=()=>{
+  list.innerHTML="";
+  sync();
+};
+document.getElementById("addBtn").onclick=()=>addRacer();
+
+/* Upload all */
+document.getElementById("uploadAll").onclick=()=>uploadAllInput.click();
+uploadAllInput.onchange=async e=>{
+  list.innerHTML="";
+  for(const f of e.target.files){
+    const reader=new FileReader();
+    reader.onload=()=>addRacer(f.name.replace(/\..+/,""),reader.result);
+    reader.readAsDataURL(f);
+  }
+};
+</script>
 </body>
 </html>
-

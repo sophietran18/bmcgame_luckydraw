@@ -25,9 +25,9 @@
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
       color:var(--txt);
       background:
-        radial-gradient(1000px 600px at 20% 15%, rgba(124,77,255,.28), transparent 60%),
-        radial-gradient(1000px 700px at 85% 25%, rgba(0,229,255,.18), transparent 55%),
-        radial-gradient(700px 500px at 55% 95%, rgba(61,255,139,.10), transparent 60%),
+        radial-gradient(1000px 600px at 20% 15%, rgba(124,77,255,.22), transparent 60%),
+        radial-gradient(1000px 700px at 85% 25%, rgba(0,229,255,.16), transparent 55%),
+        radial-gradient(700px 500px at 55% 95%, rgba(255,211,77,.10), transparent 60%),
         linear-gradient(180deg, var(--bg0), var(--bg1));
       overflow-x:hidden;
     }
@@ -109,7 +109,7 @@
       50% { transform: scale(1.15) rotate(-10deg); opacity:.95; }
     }
 
-    /* floating image (MoMo Illustration pack) */
+    /* floating image (MoMo Illustration) */
     .float-img{
       position:absolute;
       width: var(--w, 92px);
@@ -514,9 +514,6 @@
       animation: fall linear forwards;
     }
     @keyframes fall{ to{ transform: translateY(calc(100vh + 40px)) rotate(720deg); } }
-
-    .muted{ color:var(--muted); }
-    .mono{ font-variant-numeric: tabular-nums; }
   </style>
 </head>
 
@@ -530,7 +527,7 @@
       <div class="brand">
         <h1 class="title">Neon Dash <span class="badge">BMC Team Avatars 👤</span></h1>
         <p class="subtitle">
-          Theme: Mood Emojis / F&B Emojis / MoMo Illustration. MoMo Illustration cần bạn <b>Upload MoMo Pack</b> (nhiều ảnh 1 lần) để float theo pack đó.
+          Theme 1: Mood Emojis · Theme 2: F&B Emojis · Theme 3: MoMo Illustration (load từ folder <b>/assets</b> trong repo)
         </p>
       </div>
       <div class="pill">Tip: <b>Space</b> Start/Pause · <b>B</b> Boost ngẫu nhiên</div>
@@ -542,28 +539,21 @@
           <div class="row">
             <label for="raceLength">Race length</label>
             <div class="input">
-              <span class="muted">🏁</span>
+              <span style="opacity:.7">🏁</span>
               <input id="raceLength" type="range" min="700" max="1600" value="1100" />
-              <span id="raceLengthLabel" class="muted mono" style="min-width:66px;text-align:right">1100px</span>
+              <span id="raceLengthLabel" style="opacity:.75;min-width:66px;text-align:right">1100px</span>
             </div>
           </div>
 
           <div class="row">
             <label for="theme">Theme</label>
             <div class="input">
-              <span class="muted">🎨</span>
+              <span style="opacity:.7">🎨</span>
               <select id="theme">
                 <option value="mood" selected>Mood Emojis</option>
                 <option value="fb">F&B Emojis</option>
                 <option value="momo">MoMo Illustration</option>
               </select>
-            </div>
-          </div>
-
-          <div class="row" style="grid-column:1/-1;">
-            <div class="btns" style="margin-top:0;">
-              <button class="ghost" id="uploadMomoPackBtn" title="Upload nhiều ảnh MoMo để theme MoMo Illustration dùng làm floating">Upload MoMo Pack</button>
-              <input id="uploadMomoPackInput" type="file" accept="image/*" multiple style="display:none" />
             </div>
           </div>
         </div>
@@ -572,14 +562,12 @@
           <button class="primary" id="startBtn">Start</button>
           <button class="ghost" id="pauseBtn" disabled>Pause</button>
           <button class="ghost" id="resetBtn">Reset (New round)</button>
-          <button class="danger" id="clearBtn" title="Remove all racers">Clear</button>
+          <button class="danger" id="clearBtn">Clear</button>
         </div>
 
         <div class="tip">
           <div class="dot"></div>
-          <div id="themeHint">
-            Reset = <b>new round</b> thật sự (random lại “mood speed”). “Upload all list” giúp add nhiều người 1 lần.
-          </div>
+          <div id="themeHint">Mood Emojis: emoji “mood” bay lơ lửng ✨</div>
         </div>
       </div>
 
@@ -594,7 +582,7 @@
         </div>
         <div class="list" id="racerList"></div>
         <div class="toast">
-          <div>Click avatar để upload lẻ. Hoặc dùng <b>Upload all list</b> để add nhiều người 1 lần.</div>
+          <div>Upload all list: chọn nhiều ảnh 1 lần → tự tạo người chơi (tên = tên file).</div>
           <div class="kbd">B</div>
         </div>
       </div>
@@ -607,12 +595,12 @@
           <span>·</span>
           Winner: <b id="winner">—</b>
           <span>·</span>
-          <span class="mono">Time: <b id="time">0.00s</b></span>
+          <span>Time: <b id="time">0.00s</b></span>
         </div>
 
         <div class="progressWrap">
           <div class="bar"><i id="raceBar"></i></div>
-          <div class="pct mono" id="racePct">0%</div>
+          <div class="pct" id="racePct">0%</div>
         </div>
       </div>
 
@@ -656,6 +644,7 @@
 
     const racerListEl = $("#racerList");
     const lanesEl = $("#lanes");
+    const floatingLayer = $("#floatingLayer");
 
     const startBtn = $("#startBtn");
     const pauseBtn = $("#pauseBtn");
@@ -665,9 +654,6 @@
 
     const uploadAllBtn = $("#uploadAllBtn");
     const uploadAllInput = $("#uploadAllInput");
-
-    const uploadMomoPackBtn = $("#uploadMomoPackBtn");
-    const uploadMomoPackInput = $("#uploadMomoPackInput");
 
     const raceLengthEl = $("#raceLength");
     const raceLengthLabel = $("#raceLengthLabel");
@@ -690,99 +676,87 @@
     const winnerStatsEl = $("#winnerStats");
 
     const confettiWrap = $("#confetti");
-    const floatingLayer = $("#floatingLayer");
 
     const EMOJIS = ["🏎️","🚗","🚀","🛵","🛹","🐉","🦄","🐙","🦖","🐱","🐶","🍓","🍕","🧋","⚡","🌙","🪩","🔥"];
 
-    // ONLY 3 THEMES
+    // 3 themes only
     const THEMES = {
-      mood: { accent:"#FFD34D", accent2:"#FF7AE6", good:"#3DFF8B", bg0:"#06060A", bg1:"#0A0A12" },
-      fb:   { accent:"#FF6FB1", accent2:"#8B5CFF", good:"#3DFF8B", bg0:"#FFE5F1", bg1:"#F3E9FF" },
-      momo: { accent:"#F95396", accent2:"#98CDF4", good:"#3DFF8B", bg0:"#0B0B12", bg1:"#17172A" },
+      mood: { bg0:"#06060A", bg1:"#0A0A12" },
+      fb:   { bg0:"#FFE5F1", bg1:"#F3E9FF" },
+      momo: { bg0:"#0B0B12", bg1:"#17172A" },
     };
 
-    // MoMo Illustration pack (uploaded locally)
-   // ===== MoMo Illustration pack: hard-code list (Cách 1) =====
-// Lưu ý: encodeURIComponent để xử lý khoảng trắng, dấu +, dấu tiếng Việt...
-let momoPackImages = MOMO_ASSET_NAMES.map(
-  name => `/assets/${encodeURIComponent(name)}`
-);
-
+    /* =========================
+       THEME 3 — MoMo assets list
+       Files are under /assets (NOT /assets/momo)
+       ========================= */
     const MOMO_ASSET_NAMES = [
-  // (đã có trước) + (bổ sung từ screenshot mới)
-  "Mkt solution_Chu cua hang_01.png",
-  "Mkt solution_Chu cua hang_02.png",
-  "Mkt solution_Chu cua hang_03.png",
-  "Mkt solution_Chu cua hang_04.png",
-  "Mkt solution_Chu cua hang_05.png",
-  "Mkt solution_Chu cua hang_06.png",
-  "Mkt solution_Chu cua hang_07.png",
-  "Mkt solution_Chu cua hang_08.png",
-  "Mkt solution_Chu cua hang_09.png",
+      "Mkt solution_Chu cua hang_01.png",
+      "Mkt solution_Chu cua hang_02.png",
+      "Mkt solution_Chu cua hang_03.png",
+      "Mkt solution_Chu cua hang_04.png",
+      "Mkt solution_Chu cua hang_05.png",
+      "Mkt solution_Chu cua hang_06.png",
+      "Mkt solution_Chu cua hang_07.png",
+      "Mkt solution_Chu cua hang_08.png",
+      "Mkt solution_Chu cua hang_09.png",
 
-  "Mkt solution_Cua hang cf mua sam_03.png",
-  "Mkt solution_Cua hang cf mua sam_04.png",
-  "Mkt solution_Cua hang cf mua sam_05.png",
-  "Mkt solution_Cua hang cf mua sam_06.png",
+      "Mkt solution_Cua hang cf mua sam_03.png",
+      "Mkt solution_Cua hang cf mua sam_04.png",
+      "Mkt solution_Cua hang cf mua sam_05.png",
+      "Mkt solution_Cua hang cf mua sam_06.png",
 
-  "Mkt solution_FnB lam dep_01.png",
-  "Mkt solution_FnB lam dep_02.png",
-  "Mkt solution_FnB lam dep_03.png",
-  "Mkt solution_FnB lam dep_05.png",
-  "Mkt solution_FnB lam dep_06.png",
+      "Mkt solution_FnB lam dep_01.png",
+      "Mkt solution_FnB lam dep_02.png",
+      "Mkt solution_FnB lam dep_03.png",
+      "Mkt solution_FnB lam dep_05.png",
+      "Mkt solution_FnB lam dep_06.png",
 
-  "Mkt solution_Giam gia qua voucher_03.png",
-  "Mkt solution_Giam gia qua voucher_04.png",
+      "Mkt solution_Giam gia qua voucher_01.png",
+      "Mkt solution_Giam gia qua voucher_02.png",
+      "Mkt solution_Giam gia qua voucher_03.png",
+      "Mkt solution_Giam gia qua voucher_04.png",
+      "Mkt solution_Giam gia qua voucher_05.png",
 
-  // ===== bổ sung từ screenshot mới =====
-  "Mkt solution_Giam gia qua voucher_05.png",
+      "Mkt solution_Mua sam an uong_01.png",
+      "Mkt solution_Mua sam an uong_02.png",
+      "Mkt solution_Mua sam an uong_03.png",
+      "Mkt solution_Mua sam an uong_04.png",
+      "Mkt solution_Mua sam an uong_05.png",
 
-  "Mkt solution_Mua sam an uong_01.png",
-  "Mkt solution_Mua sam an uong_02.png",
-  "Mkt solution_Mua sam an uong_03.png",
-  "Mkt solution_Mua sam an uong_04.png",
-  "Mkt solution_Mua sam an uong_05.png",
+      "TTT_Cf tra sua_01.png",
+      "TTT_Cf tra sua_02.png",
+      "TTT_Cf tra sua_03.png",
 
-  "Mkt solution_giam gia qua voucher_01.png",
-  "Mkt solution_giam gia qua voucher_02.png",
+      "TTT_Tui +_01.png",
+      "TTT_Tui +_02.png",
+      "TTT_Tui +_03.png",
 
-  "TTT_Cf tra sua_01.png",
-  "TTT_Cf tra sua_02.png",
-  "TTT_Cf tra sua_03.png",
+      "TTT_chart tang truong_03.png",
 
-  "TTT_Tui +_01.png",
-  "TTT_Tui +_02.png",
-  "TTT_Tui +_03.png",
+      "TTT_dong xu_01.png",
+      "TTT_dong xu_02.png",
+      "TTT_dong xu_03.png",
 
-  "TTT_chart tang truong_03.png",
+      "TTT_fast food_01.png",
+      "TTT_fast food_02.png",
+      "TTT_fast food_03.png",
+      "TTT_fast food_04.png",
 
-  "TTT_dong xu_01.png",
-  "TTT_dong xu_02.png",
-  "TTT_dong xu_03.png",
+      "TTT_shopping bag_01.png",
+      "TTT_shopping bag_02.png",
+      "TTT_shopping bag_03.png",
+    ];
 
-  "TTT_fast food_01.png",
-  "TTT_fast food_02.png",
-  "TTT_fast food_03.png",
-  "TTT_fast food_04.png",
+    const momoPackImages = MOMO_ASSET_NAMES.map(name => `/assets/${encodeURIComponent(name)}`);
 
-  "TTT_shopping bag_01.png",
-  "TTT_shopping bag_02.png",
-  "TTT_shopping bag_03.png",
-];
-
-// Build final URLs (safe for spaces/+)
-let momoPackImages = MOMO_ASSET_NAMES.map(name => `/assets/momo/${encodeURIComponent(name)}`);
-
-
+    // ===== State =====
     let racerInputs = [];
     let racers = [];
-
     let running = false;
     let finished = false;
-
     let startTime = 0;
     let elapsed = 0;
-
     let rafId = null;
     let lastTs = 0;
 
@@ -792,13 +766,9 @@ let momoPackImages = MOMO_ASSET_NAMES.map(name => `/assets/momo/${encodeURICompo
 
     function applyTheme(name){
       const t = THEMES[name] || THEMES.mood;
-      document.documentElement.style.setProperty("--accent", t.accent);
-      document.documentElement.style.setProperty("--accent2", t.accent2);
-      document.documentElement.style.setProperty("--good", t.good);
       document.documentElement.style.setProperty("--bg0", t.bg0);
       document.documentElement.style.setProperty("--bg1", t.bg1);
 
-      // background per theme
       if (name === "fb"){
         document.body.style.background =
           `radial-gradient(900px 600px at 25% 20%, rgba(255,111,177,.28), transparent 60%),
@@ -856,7 +826,6 @@ let momoPackImages = MOMO_ASSET_NAMES.map(name => `/assets/momo/${encodeURICompo
       const W = window.innerWidth;
       const H = window.innerHeight;
 
-      // shared stars
       function addStars(n){
         for (let i = 0; i < n; i++){
           const s = document.createElement("div");
@@ -868,7 +837,6 @@ let momoPackImages = MOMO_ASSET_NAMES.map(name => `/assets/momo/${encodeURICompo
         }
       }
 
-      // helper: add floating emoji glyphs
       function addEmojiSet(emojiSet, count){
         for (let i = 0; i < count; i++){
           const e = document.createElement("div");
@@ -898,7 +866,6 @@ let momoPackImages = MOMO_ASSET_NAMES.map(name => `/assets/momo/${encodeURICompo
         }
       }
 
-      // helper: add floating images (MoMo pack)
       function addImageSet(imgSet, count){
         if (!imgSet || imgSet.length === 0) return;
         for (let i = 0; i < count; i++){
@@ -935,7 +902,6 @@ let momoPackImages = MOMO_ASSET_NAMES.map(name => `/assets/momo/${encodeURICompo
       }
 
       if (themeName === "fb"){
-        // F&B vibe theo ref (đồ ăn + vài mặt cười nhỏ)
         const FB_SET = ["🍔","🍕","🍩","🍰","🧁","🍎","🍓","🍦","🍭","🍟","🥤","🍫","🥥","🍧","🍡","🍇","😋","🤤","😍","😛"];
         addEmojiSet(FB_SET, 14);
         addStars(10);
@@ -944,15 +910,9 @@ let momoPackImages = MOMO_ASSET_NAMES.map(name => `/assets/momo/${encodeURICompo
       }
 
       if (themeName === "momo"){
-        // MoMo Illustration: floating bằng ảnh upload từ máy (momoPackImages)
         addImageSet(momoPackImages, 12);
         addStars(10);
-
-        if (!momoPackImages || momoPackImages.length === 0){
-          themeHint.innerHTML = `MoMo Illustration: bạn chưa upload pack. Bấm <b>Upload MoMo Pack</b> để chọn nhiều ảnh (PNG/JPG) từ máy.`;
-        } else {
-          themeHint.innerHTML = `MoMo Illustration: đang dùng ${momoPackImages.length} ảnh trong pack để floating 💗`;
-        }
+        themeHint.innerHTML = `MoMo Illustration: đang dùng <b>${momoPackImages.length}</b> ảnh trong <b>/assets</b> để floating 💗`;
         return;
       }
     }
@@ -1130,7 +1090,7 @@ let momoPackImages = MOMO_ASSET_NAMES.map(name => `/assets/momo/${encodeURICompo
         name.textContent = r.name;
 
         const stat = document.createElement("div");
-        stat.className = "stat mono";
+        stat.className = "stat";
         stat.textContent = "0%";
 
         tag.appendChild(name);
@@ -1373,7 +1333,6 @@ let momoPackImages = MOMO_ASSET_NAMES.map(name => `/assets/momo/${encodeURICompo
     function filenameToName(filename){
       return filename.replace(/\.[^/.]+$/, "").replace(/[_-]+/g, " ").trim();
     }
-
     function readFileAsDataURL(file){
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -1382,20 +1341,16 @@ let momoPackImages = MOMO_ASSET_NAMES.map(name => `/assets/momo/${encodeURICompo
         reader.readAsDataURL(file);
       });
     }
-
     async function handleUploadAll(files){
       if (!files || files.length === 0) return;
 
-      // stop race & reset UI
       stopLoop();
       running = false;
       finished = false;
       setStatus("idle");
 
-      // replace entire racer list with uploaded files
       clearRacerUI();
 
-      // build rows in order
       for (const file of files){
         const dataURL = await readFileAsDataURL(file);
         makeRacerRow({
@@ -1408,17 +1363,6 @@ let momoPackImages = MOMO_ASSET_NAMES.map(name => `/assets/momo/${encodeURICompo
       rebuildTrack();
     }
 
-    // ===== Upload MoMo pack (for floating) =====
-    async function handleUploadMomoPack(files){
-      if (!files || files.length === 0) return;
-      momoPackImages = [];
-      for (const file of files){
-        const dataURL = await readFileAsDataURL(file);
-        momoPackImages.push(dataURL);
-      }
-      if (themeEl.value === "momo") buildFloatingTheme("momo");
-    }
-
     // ===== Events =====
     raceLengthEl.addEventListener("input", updateSliders);
 
@@ -1426,7 +1370,6 @@ let momoPackImages = MOMO_ASSET_NAMES.map(name => `/assets/momo/${encodeURICompo
       applyTheme(themeEl.value);
       buildFloatingTheme(themeEl.value);
     });
-
     window.addEventListener("resize", () => buildFloatingTheme(themeEl.value));
 
     addBtn.addEventListener("click", () => {
@@ -1485,20 +1428,11 @@ let momoPackImages = MOMO_ASSET_NAMES.map(name => `/assets/momo/${encodeURICompo
       if (e.key.toLowerCase() === "b") manualBoost();
     });
 
-    // Upload all list button
     uploadAllBtn.addEventListener("click", () => uploadAllInput.click());
     uploadAllInput.addEventListener("change", async () => {
       const files = Array.from(uploadAllInput.files || []);
       await handleUploadAll(files);
       uploadAllInput.value = "";
-    });
-
-    // Upload MoMo pack button
-    uploadMomoPackBtn.addEventListener("click", () => uploadMomoPackInput.click());
-    uploadMomoPackInput.addEventListener("change", async () => {
-      const files = Array.from(uploadMomoPackInput.files || []);
-      await handleUploadMomoPack(files);
-      uploadMomoPackInput.value = "";
     });
 
     // ===== Init =====
@@ -1515,6 +1449,3 @@ let momoPackImages = MOMO_ASSET_NAMES.map(name => `/assets/momo/${encodeURICompo
   </script>
 </body>
 </html>
-
-
-

@@ -549,14 +549,12 @@
             <label for="theme">Theme</label>
             <div class="input">
               <span style="opacity:.7">🎨</span>
-              <select id="theme">
-                <option value="mood" selected>Mood Emojis</option>
-                <option value="fb">F&B Emojis</option>
-                <option value="momo">MoMo Illustration</option>
-              </select>
-            </div>
-          </div>
-        </div>
+             <select id="theme">
+  <option value="mood">Mood Emojis</option>
+  <option value="fb" selected>F&B Emojis</option>
+  <option value="momo">MoMo Illustration</option>
+</select>
+
 
         <div class="btns">
           <button class="primary" id="startBtn">Start</button>
@@ -1449,19 +1447,19 @@ if (name === "fb") {
     });
 
     // ===== Init =====
-    (function init(){
-      updateSliders();
-      applyTheme("mood");
-      buildFloatingTheme("mood");
+   (function init(){
+  updateSliders();
+  applyTheme("fb");
+  buildFloatingTheme("fb");
 
-      // default: 1 empty row
-      makeRacerRow({ name:"", emoji:"🎯", avatar: null });
+  makeRacerRow({ name:"", emoji:"🎯", avatar: null });
+  rebuildTrack();
+})();
 
-      rebuildTrack();
-    })();
   </script>
 </body>
 </html>
+
 
 
 

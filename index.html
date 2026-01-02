@@ -767,7 +767,7 @@ const MOMO_ASSET_NAMES = [
 ];
 
 // Build final URLs (safe for spaces/+)
-let momoPackImages = MOMO_ASSET_NAMES.map(name => `assets/momo/${encodeURIComponent(name)}`);
+let momoPackImages = MOMO_ASSET_NAMES.map(name => `/assets/momo/${encodeURIComponent(name)}`);
 
 
     let racerInputs = [];
@@ -1511,4 +1511,5 @@ let momoPackImages = MOMO_ASSET_NAMES.map(name => `assets/momo/${encodeURICompon
   </script>
 </body>
 </html>
+
 
